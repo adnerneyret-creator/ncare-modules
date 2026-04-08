@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ncare · Strong without a gym</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --red:#DC2626; --red-l:#FEF2F2;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--red); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--red); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--red); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:#FCA5A5; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* CIRCUIT */
+.slide-circuit { background:var(--navy); }
+.circuit-header { display:flex; justify-content:space-between; align-items:center; }
+.circuit-title { font-size:20px; font-weight:800; color:white; }
+.circuit-badge { background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); border-radius:20px; padding:4px 12px; font-size:12px; color:#FCA5A5; font-weight:700; }
+.exercises { display:flex; flex-direction:column; gap:10px; }
+.exercise { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+.exercise.active-ex { border-color:var(--red); background:rgba(220,38,38,0.08); }
+.exercise.done-ex { border-color:var(--green); background:rgba(29,184,126,0.08); }
+.ex-emoji { font-size:28px; flex-shrink:0; }
+.ex-info { flex:1; }
+.ex-name { font-size:14px; font-weight:700; color:white; margin-bottom:2px; }
+.ex-reps { font-size:12px; color:rgba(255,255,255,0.45); }
+.ex-check { width:24px; height:24px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:transparent; transition:all 0.2s; }
+.exercise.done-ex .ex-check { background:var(--green); border-color:var(--green); color:white; }
+
+/* CIRCUIT TIMER */
+.circuit-timer { background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; }
+.ct-display { font-size:32px; font-weight:900; color:var(--red); font-variant-numeric:tabular-nums; min-width:70px; }
+.ct-info { flex:1; }
+.ct-label { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+.ct-current { font-size:13px; font-weight:700; color:white; }
+.ct-btn { background:var(--red); border:none; border-radius:12px; padding:10px 16px; font-size:13px; font-weight:700; color:white; cursor:pointer; flex-shrink:0; }
+.ct-btn.pause-btn { background:rgba(255,255,255,0.1); }
+.circuit-progress { display:flex; gap:6px; }
+.cp-dot { flex:1; height:4px; border-radius:2px; background:rgba(255,255,255,0.1); transition:background 0.3s; }
+.cp-dot.done { background:var(--green); }
+.cp-dot.active { background:var(--red); }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.25); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#FCA5A5; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.rule-box { background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.2); border-radius:14px; padding:16px; }
+.rule-title { font-size:14px; font-weight:800; color:#FCA5A5; margin-bottom:8px; }
+.rule-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">💪</div>
+      <div class="cover-title">Strong without<br>a gym.</div>
+      <div class="cover-sub">You don't need a membership. You need 20 minutes and a floor.</div>
+      <div class="cover-tag">Module 08 — Resistance training at home</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">20'</div><div class="stat-lbl">circuit</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: WHY MUSCLE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Muscle is your<br>metabolic insurance.</div>
+      <div class="s-sub">The single most important tissue for weight maintenance.</div>
+      <div style="display:flex; gap:10px;">
+        <div style="background:rgba(220,38,38,0.12); border-radius:14px; padding:16px 14px; flex:1;">
+          <div style="font-size:40px; font-weight:900; color:#FCA5A5; line-height:1;">–3kg</div>
+          <div style="font-size:13px; font-weight:600; color:#FCA5A5; margin-top:4px;">Muscle lost</div>
+          <div style="font-size:12px; opacity:0.7; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">average during GLP-1 treatment without resistance training</div>
+        </div>
+        <div style="background:rgba(29,184,126,0.12); border-radius:14px; padding:16px 14px; flex:1;">
+          <div style="font-size:40px; font-weight:900; color:var(--green); line-height:1;">+150</div>
+          <div style="font-size:13px; font-weight:600; color:var(--green); margin-top:4px;">Cal/day burned</div>
+          <div style="font-size:12px; opacity:0.7; color:rgba(255,255,255,0.6); margin-top:4px; line-height:1.4;">per kg of muscle mass — even at rest</div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:#FCA5A5;">Why this matters for maintenance</div>
+        <div class="item"><div class="item-dot" style="background:#FCA5A5;"></div><div class="item-text"><strong>Muscle burns calories at rest.</strong> Every kg of muscle you carry burns ~150 extra calories per day — without any effort. It's a metabolic engine running 24/7.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>GLP-1 causes muscle loss.</strong> Without resistance training during treatment, 25–40% of weight lost is muscle — not fat. This lowers your resting metabolism and makes rebound more likely.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>2 sessions per week is enough.</strong> Minimum effective dose for muscle maintenance: 2×20 minutes of resistance work. No gym needed. Body weight is sufficient.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: THE CIRCUIT -->
+    <div class="slide slide-circuit" data-index="2">
+      <div class="circuit-header">
+        <div class="circuit-title">The 20-minute circuit.</div>
+        <div class="circuit-badge">4 exercises</div>
+      </div>
+      <div style="font-size:13px; color:rgba(255,255,255,0.45);">Tap each exercise when done — or use the timer below.</div>
+
+      <div class="circuit-progress" id="circuitProgress">
+        <div class="cp-dot active" id="cpd0"></div>
+        <div class="cp-dot" id="cpd1"></div>
+        <div class="cp-dot" id="cpd2"></div>
+        <div class="cp-dot" id="cpd3"></div>
+      </div>
+
+      <div class="exercises" id="exerciseList">
+        <div class="exercise active-ex" id="ex0" onclick="markDone(0)">
+          <div class="ex-emoji">🦵</div>
+          <div class="ex-info">
+            <div class="ex-name">Squats</div>
+            <div class="ex-reps">3 sets × 12 reps · 60 sec rest · Feet shoulder-width apart</div>
+          </div>
+          <div class="ex-check" id="ec0">✓</div>
+        </div>
+        <div class="exercise" id="ex1" onclick="markDone(1)">
+          <div class="ex-emoji">💪</div>
+          <div class="ex-info">
+            <div class="ex-name">Push-ups</div>
+            <div class="ex-reps">3 sets × 8–12 reps · 60 sec rest · Knees OK if needed</div>
+          </div>
+          <div class="ex-check" id="ec1">✓</div>
+        </div>
+        <div class="exercise" id="ex2" onclick="markDone(2)">
+          <div class="ex-emoji">🏋️</div>
+          <div class="ex-info">
+            <div class="ex-name">Glute bridge</div>
+            <div class="ex-reps">3 sets × 15 reps · 45 sec rest · Squeeze at the top</div>
+          </div>
+          <div class="ex-check" id="ec2">✓</div>
+        </div>
+        <div class="exercise" id="ex3" onclick="markDone(3)">
+          <div class="ex-emoji">🧘</div>
+          <div class="ex-info">
+            <div class="ex-name">Plank</div>
+            <div class="ex-reps">3 sets × 30 sec hold · 45 sec rest · Elbows or hands</div>
+          </div>
+          <div class="ex-check" id="ec3">✓</div>
+        </div>
+      </div>
+
+      <div class="circuit-timer">
+        <div class="ct-display" id="ctDisplay">1:00</div>
+        <div class="ct-info">
+          <div class="ct-label">Rest timer</div>
+          <div class="ct-current" id="ctCurrent">Between sets</div>
+        </div>
+        <button class="ct-btn" id="ctBtn" onclick="ctAction()">Start rest</button>
+      </div>
+    </div>
+
+    <!-- 3: FORM GUIDE -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Form over speed.<br>Every time.</div>
+      <div class="s-sub">Three form rules that prevent 90% of home workout injuries.</div>
+      <div class="tip-card" style="background:var(--red-l); border-color:var(--red);">
+        <div class="tip-title" style="color:var(--red);">Squats — knees track over toes</div>
+        <div class="tip-text">Push your knees outward — never let them cave inward. Go only as deep as comfortable. Depth comes with practice. A shallow squat done safely beats a deep squat done wrong.</div>
+      </div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);">
+        <div class="tip-title" style="color:#B07518;">Push-ups — one straight line</div>
+        <div class="tip-text">Head, shoulders, hips, ankles — one line. If hips sag, drop to knees. The modification is not a failure. It's the correct regression. Build the line, then build the reps.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#147A53;">Plank — breathe, don't hold</div>
+        <div class="tip-text">Most people hold their breath in a plank. This spikes blood pressure unnecessarily. Breathe normally throughout. If you can't breathe, shorten the hold — don't stop breathing.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💡 <strong style="color:var(--navy);">Progressive overload:</strong> Add 1 rep per set each week. Not more. Consistency over months beats intensity for one session. Muscle is built in the adaptation phase — not during the workout.</div>
+      </div>
+    </div>
+
+    <!-- 4: PROGRESSION -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">How to progress<br>without getting hurt.</div>
+      <div class="s-sub">One rule. Simple enough to never overthink.</div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.85); font-size:14px; font-weight:600; line-height:1.7;">The 2-sessions-per-week rule: <strong style="color:var(--green);">never add intensity and frequency at the same time.</strong> Increase one, keep the other constant. Your muscles need 48 hours to recover between sessions.</div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--amber);">Month-by-month progression</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Month 1:</strong> 2×/week · 3 sets · 8–10 reps · Body weight only. Learn the movements. Don't rush.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Month 2:</strong> 2×/week · 3 sets · 12–15 reps · Add a 5th exercise (lunges). Increase range of motion.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Month 3:</strong> 2–3×/week · 4 sets · Add resistance (backpack with books, resistance bands). Muscle memory is established.</div></div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--coral);">Signs you're overdoing it</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text">Soreness lasting more than 3 days after a session → reduce volume by 30%.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text">Joint pain (not muscle fatigue) → stop that exercise and simplify the movement.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text">Dreading sessions every time → reduce frequency to 1×/week until enjoyment returns.</div></div>
+      </div>
+    </div>
+
+    <!-- 5: FINAL -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">MAINTAIN · Your metabolic engine</div>
+      <div class="final-title">Two sessions<br>a week. That's<br>your insurance policy.</div>
+      <div class="final-body">Every session you complete adds to your resting metabolic rate. Not dramatically — but permanently. Muscle built in Month 1 is still burning calories in Month 12.</div>
+      <div class="rule-box">
+        <div class="rule-title">The minimum viable commitment</div>
+        <div class="rule-text">If you can only do one thing from this module — do the squats. 3 sets of 12, twice a week. The largest muscle group in your body. The highest metabolic return per minute of any exercise you can do at home.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">Module 09 — Eat less often to eat better.</strong> Intermittent fasting 16/8 — for whom, how, and why it works for maintenance specifically.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); });
+}
+function getClass(idx) {
+  if (idx===0) return 'slide slide-cover';
+  if (idx===2) return 'slide slide-circuit';
+  if (idx===3) return 'slide slide-white';
+  if (idx===5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--red)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50)navigate(d>0?1:-1);
+},{passive:true});
+
+// CIRCUIT
+var exDone = [false,false,false,false];
+function markDone(idx) {
+  exDone[idx] = !exDone[idx];
+  var ex = document.getElementById('ex'+idx);
+  if (exDone[idx]) {
+    ex.className = 'exercise done-ex';
+    var next = idx+1;
+    if (next < 4) document.getElementById('ex'+next).className = 'exercise active-ex';
+  } else {
+    ex.className = 'exercise';
+  }
+  updateProgress();
+}
+function updateProgress() {
+  exDone.forEach(function(d,i){
+    var dot = document.getElementById('cpd'+i);
+    if (d) dot.className = 'cp-dot done';
+    else if (!exDone[i-1] && i>0 || i===0) dot.className = 'cp-dot';
+  });
+  var activeIdx = exDone.indexOf(false);
+  if (activeIdx >= 0) document.getElementById('cpd'+activeIdx).className = 'cp-dot active';
+}
+
+// REST TIMER
+var ctRunning=false, ctDone=false;
+var ctTotal=60, ctRemaining=60;
+var ctInterval=null;
+function ctFmt(s){ return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+function ctAction() {
+  if(!ctRunning){
+    ctRunning=true;
+    ctRemaining=60;
+    document.getElementById('ctBtn').textContent='Stop';
+    document.getElementById('ctBtn').className='ct-btn pause-btn';
+    document.getElementById('ctCurrent').textContent='Rest — breathe slowly';
+    ctInterval=setInterval(function(){
+      ctRemaining--;
+      document.getElementById('ctDisplay').textContent=ctFmt(ctRemaining);
+      if(ctRemaining<=0){
+        clearInterval(ctInterval);
+        ctRunning=false;
+        document.getElementById('ctDisplay').textContent='GO';
+        document.getElementById('ctCurrent').textContent='Next set — tap exercise when done';
+        document.getElementById('ctBtn').textContent='Start rest';
+        document.getElementById('ctBtn').className='ct-btn';
+      }
+    },1000);
+  } else {
+    clearInterval(ctInterval);
+    ctRunning=false;
+    ctRemaining=60;
+    document.getElementById('ctDisplay').textContent=ctFmt(ctRemaining);
+    document.getElementById('ctBtn').textContent='Start rest';
+    document.getElementById('ctBtn').className='ct-btn';
+    document.getElementById('ctCurrent').textContent='Between sets';
+  }
+}
+</script>
+</body>
+</html>

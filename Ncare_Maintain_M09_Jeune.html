@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ncare · Eat less often to eat better</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --indigo:#4F46E5; --indigo-l:#EEF2FF;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--indigo); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--indigo); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--indigo); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(79,70,229,0.15); border:1px solid rgba(79,70,229,0.35); border-radius:20px; padding:6px 16px; font-size:12px; color:#A5B4FC; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* WINDOW VISUAL */
+.window-wrap { background:var(--navy2); border-radius:16px; padding:16px; }
+.window-title { font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; }
+.window-bar { display:flex; height:44px; border-radius:10px; overflow:hidden; }
+.window-fast { flex:16; background:rgba(79,70,229,0.25); display:flex; align-items:center; justify-content:center; }
+.window-eat { flex:8; background:rgba(29,184,126,0.3); display:flex; align-items:center; justify-content:center; }
+.window-label { font-size:11px; font-weight:700; }
+.window-legend { display:flex; gap:16px; margin-top:10px; }
+.window-leg-item { display:flex; gap:6px; align-items:center; }
+.window-leg-dot { width:10px; height:10px; border-radius:3px; }
+.window-leg-text { font-size:12px; color:rgba(255,255,255,0.6); }
+.window-insight { background:rgba(79,70,229,0.1); border-radius:10px; padding:10px 12px; margin-top:10px; font-size:12px; color:rgba(255,255,255,0.7); line-height:1.5; }
+
+/* CLOCK SELECTOR */
+.slide-clock { background:var(--navy); }
+.clock-intro { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; }
+.clock-options { display:flex; flex-direction:column; gap:8px; }
+.clock-opt { background:var(--navy2); border:2px solid transparent; border-radius:14px; padding:14px 16px; cursor:pointer; transition:all 0.2s; }
+.clock-opt.selected { border-color:var(--indigo); background:rgba(79,70,229,0.1); }
+.clock-opt-title { font-size:14px; font-weight:700; color:white; margin-bottom:4px; }
+.clock-opt-sub { font-size:12px; color:rgba(255,255,255,0.4); line-height:1.4; }
+.clock-result { display:none; background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.25); border-radius:14px; padding:14px 16px; }
+.clock-result.visible { display:block; }
+.clock-result-title { font-size:13px; font-weight:700; color:var(--green); margin-bottom:6px; }
+.clock-result-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(79,70,229,0.15); border:1px solid rgba(79,70,229,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#A5B4FC; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.not-for-you { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.2); border-radius:14px; padding:14px 16px; }
+.not-title { font-size:13px; font-weight:700; color:var(--coral); margin-bottom:6px; }
+.not-text { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🕐</div>
+      <div class="cover-title">Eat less often<br>to eat better.</div>
+      <div class="cover-sub">It's not a diet. It's a window. And you probably already do part of it.</div>
+      <div class="cover-tag">Module 09 — Intermittent fasting 16/8</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Tool</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE IMAGE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">An open window.<br>A closed window.</div>
+      <div class="s-sub">That's the entire concept. Nothing more.</div>
+      <div class="window-wrap">
+        <div class="window-title">Your 24-hour day</div>
+        <div class="window-bar">
+          <div class="window-fast">
+            <span class="window-label" style="color:#A5B4FC;">16h fasting</span>
+          </div>
+          <div class="window-eat">
+            <span class="window-label" style="color:var(--green);">8h eating</span>
+          </div>
+        </div>
+        <div class="window-legend">
+          <div class="window-leg-item">
+            <div class="window-leg-dot" style="background:rgba(79,70,229,0.5);"></div>
+            <div class="window-leg-text">Fasting window — no calories</div>
+          </div>
+          <div class="window-leg-item">
+            <div class="window-leg-dot" style="background:rgba(29,184,126,0.5);"></div>
+            <div class="window-leg-text">Eating window — all meals here</div>
+          </div>
+        </div>
+        <div class="window-insight">Most people already fast 8–10 hours overnight. 16/8 simply extends that natural window by delaying breakfast 2–3 hours.</div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--indigo);">What happens during the 16-hour window</div>
+        <div class="item"><div class="item-dot" style="background:#A5B4FC;"></div><div class="item-text"><strong>Hours 0–8:</strong> digestion completes, insulin drops to baseline. Body shifts from glucose-burning to fat-burning mode.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Hours 8–12:</strong> glycogen stores deplete. Fat oxidation increases. Ketone production begins mildly.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Hours 12–16:</strong> autophagy activates — cellular cleaning process. Growth hormone rises, protecting muscle mass during the fast.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: WHO IT'S FOR -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">Is 16/8 right for you?</div>
+      <div class="s-sub">Three profiles. One honest answer each.</div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="card-title" style="color:var(--green);">✓ Good fit</div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text">You skip breakfast occasionally and feel fine. You eat dinner before 8pm. You don't have hypoglycemia or diabetes requiring frequent meals.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2);">
+        <div class="card-title" style="color:var(--amber);">⚡ Proceed with care</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text">You exercise in the morning — eat within 2 hours of your session. You have a history of disordered eating — IF can trigger restriction patterns. Start with 12/12 instead.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:var(--coral);">✗ Not recommended</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text">You're pregnant or breastfeeding. You have type 1 diabetes or take insulin. You have a history of eating disorders. In these cases — skip this module entirely. The other 11 modules are enough.</div></div>
+      </div>
+    </div>
+
+    <!-- 3: YOUR WINDOW -->
+    <div class="slide slide-clock" data-index="3">
+      <div class="s-title">Find your window.</div>
+      <div class="clock-intro">When do you usually eat your last meal of the day?</div>
+      <div class="clock-options">
+        <div class="clock-opt" id="co0" onclick="selectWindow(0)">
+          <div class="clock-opt-title">Before 7pm</div>
+          <div class="clock-opt-sub">Early dinner — most flexibility</div>
+        </div>
+        <div class="clock-opt" id="co1" onclick="selectWindow(1)">
+          <div class="clock-opt-title">7pm – 8pm</div>
+          <div class="clock-opt-sub">Standard dinner time</div>
+        </div>
+        <div class="clock-opt" id="co2" onclick="selectWindow(2)">
+          <div class="clock-opt-title">8pm – 9pm</div>
+          <div class="clock-opt-sub">Late dinner</div>
+        </div>
+        <div class="clock-opt" id="co3" onclick="selectWindow(3)">
+          <div class="clock-opt-title">After 9pm</div>
+          <div class="clock-opt-sub">Very late — worth shifting</div>
+        </div>
+      </div>
+      <div class="clock-result" id="clockResult"></div>
+    </div>
+
+    <!-- 4: HOW TO START -->
+    <div class="slide slide-white" data-index="4">
+      <div class="s-title">How to start<br>without suffering.</div>
+      <div class="s-sub">The only way that works long-term: gradually.</div>
+      <div class="tip-card" style="background:var(--indigo-l); border-color:var(--indigo);">
+        <div class="tip-title" style="color:var(--indigo);">Week 1 — 12/12: just skip the after-dinner snack</div>
+        <div class="tip-text">Finish dinner. Close the kitchen. Nothing until breakfast. Most people are already close to 12/12 — this makes it conscious and consistent.</div>
+      </div>
+      <div class="tip-card" style="background:#EFF9FF; border-color:var(--teal);">
+        <div class="tip-title" style="color:#0670A0;">Week 2 — 14/10: push breakfast back by 2 hours</div>
+        <div class="tip-text">If you normally eat at 7am, start at 9am. Black coffee or tea is allowed — zero calories. Water is always allowed. Most hunger in the morning is habit, not biology.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#147A53;">Week 3+ — 16/8: the full window</div>
+        <div class="tip-text">If breakfast was at 9am, first meal is now 11am–12pm. Eat normally within the 8-hour window. No calorie restriction. No food rules. Just timing.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💧 <strong style="color:var(--navy);">During the fasting window:</strong> water, black coffee, plain tea, sparkling water — all fine. The goal is keeping insulin low. Any calories — even "just milk in coffee" — break the metabolic benefit.</div>
+      </div>
+    </div>
+
+    <!-- 5: FINAL -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">MAINTAIN · Optional but powerful</div>
+      <div class="final-title">A window.<br>Not a diet.<br>Not a rule.</div>
+      <div class="final-body">16/8 is a tool — not a religion. Most people who try it discover that hunger in the morning was mostly habit. Once that habit breaks, the fast becomes effortless.</div>
+      <div class="not-for-you">
+        <div class="not-title">If it doesn't work for you — that's fine</div>
+        <div class="not-text">Skipping this module changes nothing about your Maintain programme. Modules 01–08 and 10–12 are complete without it. IF is one tool among many — not a requirement.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">Module 10 — What you eat inflames or protects.</strong> Anti-inflammatory nutrition — identity-based eating without rules.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0, total=6;
+var slides=document.querySelectorAll('.slide');
+var dots=[];
+var bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots(){
+  dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); });
+}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===3) return 'slide slide-clock';
+  if(idx===4) return 'slide slide-white';
+  if(idx===5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--indigo)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+// WINDOW SELECTOR
+var windows=[
+  {last:'7pm', first:'11am', msg:'Your natural window: 7pm → 11am. That\'s a 16-hour fast with dinner at 6:30pm and lunch at 11am. Very achievable — and your sleep is entirely inside the fast.'},
+  {last:'8pm', first:'12pm', msg:'Your natural window: 8pm → 12pm. Dinner at 7:30pm, first meal at noon. A classic 16/8 schedule. Easy to maintain socially.'},
+  {last:'9pm', first:'1pm', msg:'Your natural window: 9pm → 1pm. Late dinner means a late first meal. This works — but consider shifting dinner 30 min earlier to make mornings easier.'},
+  {last:'10pm', first:'2pm', msg:'Eating after 9pm pushes your first meal to 2pm+. That\'s a long morning. Consider shifting dinner earlier by 30–60 min over 2 weeks to make the fast more comfortable.'}
+];
+function selectWindow(idx){
+  for(var i=0;i<4;i++) document.getElementById('co'+i).className='clock-opt';
+  document.getElementById('co'+idx).className='clock-opt selected';
+  var w=windows[idx];
+  var r=document.getElementById('clockResult');
+  r.innerHTML='<div class="clock-result-title">Your window: last meal '+w.last+' → first meal '+w.first+'</div><div class="clock-result-text">'+w.msg+'</div>';
+  r.className='clock-result visible';
+}
+</script>
+</body>
+</html>

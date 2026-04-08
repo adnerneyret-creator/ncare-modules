@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ncare · Eat to stay, not to lose</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--amber); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--amber); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--amber); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--amber); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* PLATE VISUAL */
+.plate-wrap { display:flex; justify-content:center; align-items:center; padding:8px 0; }
+.plate { width:220px; height:220px; border-radius:50%; background:#F0F0F0; position:relative; overflow:hidden; border:3px solid #E0E0E0; }
+.plate-section { position:absolute; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px; }
+.plate-label { font-size:11px; font-weight:700; text-align:center; line-height:1.3; }
+.plate-pct { font-size:16px; font-weight:900; }
+
+/* MYTH CARDS */
+.myth-block { background:#F8F9FA; border-radius:14px; padding:14px 16px; }
+.myth-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+.myth-tag { font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:1px; }
+.myth-tag.wrong { background:rgba(240,80,58,0.12); color:var(--coral); }
+.myth-tag.right { background:rgba(29,184,126,0.12); color:var(--green); }
+.myth-text { font-size:13px; color:var(--navy); line-height:1.5; }
+
+/* QUESTION SLIDE */
+.slide-question { background:var(--navy); justify-content:center; gap:16px; }
+.question-title { font-size:20px; font-weight:800; color:white; }
+.question-sub { font-size:13px; color:rgba(255,255,255,0.4); }
+.answer-options { display:flex; flex-direction:column; gap:10px; }
+.answer-btn { background:var(--navy2); border:2px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px; text-align:left; cursor:pointer; transition:all 0.2s; }
+.answer-btn:active { transform:scale(0.98); }
+.answer-btn.selected-right { border-color:var(--green); background:rgba(29,184,126,0.1); }
+.answer-btn.selected-wrong { border-color:var(--coral); background:rgba(240,80,58,0.1); }
+.answer-btn.revealed-right { border-color:var(--green); background:rgba(29,184,126,0.08); }
+.answer-label { font-size:14px; color:white; font-weight:600; }
+.answer-explain { font-size:12px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4; display:none; }
+.answer-explain.visible { display:block; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--amber); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.final-rule { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); border-radius:14px; padding:16px; }
+.final-rule-title { font-size:15px; font-weight:800; color:var(--amber); margin-bottom:6px; }
+.final-rule-text { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🍽️</div>
+      <div class="cover-title">Eat to stay,<br>not to lose.</div>
+      <div class="cover-sub">Diets fail because they ask you to fight yourself. Maintenance is different.</div>
+      <div class="cover-tag">Module 03 — Sustainable nutrition</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Quiz</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: REFRAME -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">The question has changed.</div>
+      <div class="s-sub">And that changes everything about how you eat.</div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:var(--coral);">While losing weight, you asked:</div>
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:15px; font-style:italic; padding:4px 0;">"How do I eat less?"</div>
+      </div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="card-title" style="color:var(--green);">Now you ask:</div>
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:15px; font-style:italic; padding:4px 0;">"How do I eat to keep my metabolism happy?"</div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--amber);">What that means in practice</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>No more calorie counting.</strong> Maintenance is about food quality and timing — not subtraction.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Hunger is information.</strong> Not an enemy. Your job is to understand it — not suppress it.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Two nutrients do 80% of the work.</strong> Protein and fibre. Everything else is detail.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: THE PLATE -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">The Maintain plate.</div>
+      <div class="s-sub">One visual. No app needed to remember it.</div>
+      <div class="plate-wrap">
+        <div class="plate">
+          <!-- Protein: top-right half -->
+          <div class="plate-section" style="top:0;right:0;width:50%;height:50%;background:rgba(29,184,126,0.25);">
+            <div class="plate-pct" style="color:var(--green);">½</div>
+            <div class="plate-label" style="color:var(--green);">Protein<br>+ Vegetables</div>
+          </div>
+          <!-- Fibre: bottom-right -->
+          <div class="plate-section" style="bottom:0;right:0;width:50%;height:50%;background:rgba(201,168,76,0.2);">
+            <div class="plate-pct" style="color:var(--gold);">¼</div>
+            <div class="plate-label" style="color:var(--gold);">Fibre<br>(legumes, greens)</div>
+          </div>
+          <!-- Carbs: left half -->
+          <div class="plate-section" style="top:0;left:0;width:50%;height:100%;background:rgba(8,145,178,0.15);">
+            <div class="plate-pct" style="color:var(--teal);">¼</div>
+            <div class="plate-label" style="color:var(--teal);">Complex<br>carbs</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--green);">Why this ratio works for maintenance</div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Protein</strong> — triggers satiety hormones (PYY, GLP-1 naturally) and preserves muscle mass. Aim for 1.2–1.6g per kg of body weight daily.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Fibre</strong> — slows glucose absorption, feeds gut bacteria that regulate appetite hormones. 25–35g per day is the maintenance target.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Complex carbs</strong> — provide sustained energy without the insulin spike that drives fat storage. Oats, sweet potato, legumes.</div></div>
+      </div>
+    </div>
+
+    <!-- 3: MYTHS -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">3 myths that cause rebound.</div>
+      <div class="s-sub">You've probably heard all of them.</div>
+      <div class="myth-block">
+        <div class="myth-row"><div class="myth-tag wrong">MYTH</div><div class="myth-text">"Eating less is always better for maintaining weight."</div></div>
+        <div class="myth-row"><div class="myth-tag right">FACT</div><div class="myth-text">Eating too little triggers metabolic adaptation — your body lowers its calorie burn. This is the #1 cause of rebound. Eating <em>enough</em> keeps your metabolism active.</div></div>
+      </div>
+      <div class="myth-block">
+        <div class="myth-row"><div class="myth-tag wrong">MYTH</div><div class="myth-text">"Carbs are the enemy of weight maintenance."</div></div>
+        <div class="myth-row"><div class="myth-tag right">FACT</div><div class="myth-text">Refined carbs spike insulin. Complex carbs fuel muscle and brain without the spike. The type matters — not the category. Removing all carbs causes cravings that lead to bingeing.</div></div>
+      </div>
+      <div class="myth-block">
+        <div class="myth-row"><div class="myth-tag wrong">MYTH</div><div class="myth-text">"If I slip once, I've failed and should restart."</div></div>
+        <div class="myth-row"><div class="myth-tag right">FACT</div><div class="myth-text">One meal changes nothing. One week of meals changes something. The "all or nothing" mindset is the most documented driver of weight cycling. Progress is a trend, not a straight line.</div></div>
+      </div>
+    </div>
+
+    <!-- 4: QUIZ -->
+    <div class="slide slide-question" data-index="4">
+      <div class="question-title">Quick check.</div>
+      <div class="question-sub">Which meal better supports weight maintenance?</div>
+      <div class="answer-options">
+        <div class="answer-btn" id="ans0" onclick="selectAnswer(0, false)">
+          <div class="answer-label">🥗 Small salad with light dressing, no protein</div>
+          <div class="answer-explain" id="exp0">Low protein = hunger returns fast. Light = metabolism gets no signal to stay active. This is a diet meal — not a maintenance meal.</div>
+        </div>
+        <div class="answer-btn" id="ans1" onclick="selectAnswer(1, true)">
+          <div class="answer-label">🍗 Chicken + roasted vegetables + lentils</div>
+          <div class="answer-explain" id="exp1">Protein (chicken) + fibre (lentils) + complex carbs (vegetables). This meal activates satiety hormones, stabilises blood sugar, and keeps metabolism running. ✓</div>
+        </div>
+        <div class="answer-btn" id="ans2" onclick="selectAnswer(2, false)">
+          <div class="answer-label">🍞 Whole wheat toast with low-fat cheese</div>
+          <div class="answer-explain" id="exp2">Better than refined carbs, but insufficient protein and fibre. Blood sugar will drop within 2 hours, triggering hunger and cravings.</div>
+        </div>
+      </div>
+      <div id="quizFeedback" style="display:none; background:var(--navy2); border-radius:12px; padding:12px 14px;">
+        <div id="quizMsg" style="font-size:13px; color:rgba(255,255,255,0.8); line-height:1.5;"></div>
+      </div>
+    </div>
+
+    <!-- 5: FINAL -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">MAINTAIN · The 80/20 rule</div>
+      <div class="final-title">Perfect doesn't<br>exist. Consistent does.</div>
+      <div class="final-body">You don't need to eat perfectly. You need to eat well 80% of the time. The other 20% is called life — and it's allowed.</div>
+      <div class="final-rule">
+        <div class="final-rule-title">Your one action for tonight</div>
+        <div class="final-rule-text">Look at what you're planning for dinner. Can you add one source of protein and one source of fibre? That's it. Not a new diet. Just two ingredients.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module arrives after your next meal tomorrow → <strong style="color:white;">Module 04 — The craving is not the enemy.</strong></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d, i) {
+    d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  });
+}
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 3) return 'slide slide-white';
+  if (idx === 4) return 'slide slide-question';
+  if (idx === 5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '✓ Done' : 'Next →';
+  nb.style.background = current === total - 1 ? 'var(--green)' : 'var(--amber)';
+  nb.style.color = current === total - 1 ? 'white' : 'var(--navy)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) {
+  var d = sx - e.changedTouches[0].clientX;
+  if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1);
+}, {passive:true});
+
+// QUIZ
+var answered = false;
+function selectAnswer(idx, correct) {
+  if (answered) return;
+  answered = true;
+  for (var i = 0; i < 3; i++) {
+    var btn = document.getElementById('ans' + i);
+    var exp = document.getElementById('exp' + i);
+    exp.className = 'answer-explain visible';
+    if (i === 1) btn.className = 'answer-btn revealed-right';
+  }
+  var selected = document.getElementById('ans' + idx);
+  selected.className = 'answer-btn ' + (correct ? 'selected-right' : 'selected-wrong');
+  var fb = document.getElementById('quizFeedback');
+  var msg = document.getElementById('quizMsg');
+  fb.style.display = 'block';
+  if (correct) {
+    msg.innerHTML = '✓ <strong style="color:var(--green)">Correct.</strong> Protein + fibre is the maintenance combination that works without restriction.';
+  } else {
+    msg.innerHTML = '→ <strong style="color:var(--amber)">Close.</strong> The right answer is the chicken + vegetables + lentils. Scroll up to see why.';
+  }
+}
+</script>
+</body>
+</html>

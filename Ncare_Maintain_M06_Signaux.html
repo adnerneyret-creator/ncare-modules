@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ncare · Your body sends signals</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--teal); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--teal); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--teal); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* SIGNAL CARDS */
+.signal-card { border-radius:16px; padding:16px; }
+.signal-num { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.signal-title { font-size:17px; font-weight:800; color:white; margin-bottom:8px; line-height:1.3; }
+.signal-why { font-size:13px; line-height:1.5; margin-bottom:10px; }
+.signal-action { border-radius:10px; padding:10px 12px; }
+.signal-action-label { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+.signal-action-text { font-size:12px; line-height:1.5; }
+
+/* CHECKLIST */
+.slide-check { background:var(--navy); }
+.check-intro { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.check-items { display:flex; flex-direction:column; gap:10px; }
+.check-item { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer; transition:all 0.2s; border:2px solid transparent; }
+.check-item.checked { border-color:var(--teal); background:rgba(8,145,178,0.1); }
+.check-item.checked .check-box { background:var(--teal); border-color:var(--teal); }
+.check-item.checked .check-box::after { opacity:1; }
+.check-box { width:24px; height:24px; border-radius:7px; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; position:relative; transition:all 0.2s; }
+.check-box::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:13px; font-weight:800; color:white; opacity:0; transition:opacity 0.2s; }
+.check-text { flex:1; }
+.check-label { font-size:13px; color:white; font-weight:600; margin-bottom:2px; }
+.check-sub { font-size:12px; color:rgba(255,255,255,0.4); line-height:1.4; }
+.check-result { display:none; border-radius:14px; padding:14px 16px; }
+.check-result.visible { display:block; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--teal); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.empowerment-box { background:rgba(8,145,178,0.1); border:1px solid rgba(8,145,178,0.25); border-radius:14px; padding:16px; }
+.empowerment-title { font-size:14px; font-weight:800; color:var(--teal); margin-bottom:8px; }
+.empowerment-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">📡</div>
+      <div class="cover-title">Your body<br>sends signals.</div>
+      <div class="cover-sub">Rebound doesn't start the day you gain weight. It starts 2 weeks before — in signals most people ignore.</div>
+      <div class="cover-tag">Module 06 — Early warning signals</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Check</div><div class="stat-lbl">list</div></div>
+      </div>
+    </div>
+
+    <!-- 1: REBOUND IS PREDICTABLE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Rebound is predictable.</div>
+      <div class="s-sub">Which means you can intercept it before it happens.</div>
+      <div class="card-dark" style="background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:14px; line-height:1.7;">Most people notice they've regained weight when the scale tells them. But the biological signals that caused the rebound started <strong style="color:var(--teal);">2 weeks earlier</strong> — in sleep quality, activity levels, and appetite patterns.</div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">The rebound sequence</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Week –2:</strong> Sleep quality drops. Energy decreases. Mood becomes slightly lower. These feel unrelated to weight — they're not.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Week –1:</strong> Sugar cravings increase. Activity spontaneously drops. Meals become less structured. The pattern is forming.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Week 0:</strong> The scale moves. But it's the end of the sequence — not the beginning. Acting here is late.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;"><strong style="color:var(--green);">The opportunity:</strong> Act at Week –2. That's what the 3 signals in this module allow you to do.</div>
+      </div>
+    </div>
+
+    <!-- 2: THREE SIGNALS -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">The 3 signals.</div>
+      <div class="s-sub">Each one is a 2-week early warning. Each one has a specific response.</div>
+
+      <div class="signal-card" style="background:rgba(124,58,237,0.12);">
+        <div class="signal-num" style="color:rgba(124,58,237,0.8);">Signal 01</div>
+        <div class="signal-title">Sleep degrades</div>
+        <div class="signal-why" style="color:rgba(255,255,255,0.65);">Poor sleep raises ghrelin and lowers leptin — the exact hormonal combination that drives hunger and fat storage. Sleep degradation precedes weight regain by 10–14 days.</div>
+        <div class="signal-action" style="background:rgba(124,58,237,0.15);">
+          <div class="signal-action-label" style="color:rgba(124,58,237,0.9);">Immediate response</div>
+          <div class="signal-action-text" style="color:rgba(255,255,255,0.7);">Fix sleep before fixing food. No screens after 9pm for 5 days. Everything else will follow.</div>
+        </div>
+      </div>
+
+      <div class="signal-card" style="background:rgba(240,80,58,0.12);">
+        <div class="signal-num" style="color:rgba(240,80,58,0.8);">Signal 02</div>
+        <div class="signal-title">Sugar cravings increase</div>
+        <div class="signal-why" style="color:rgba(255,255,255,0.65);">A spike in sweet cravings signals that blood glucose regulation is becoming less stable. This is usually caused by sleep deprivation or stress — not diet failure.</div>
+        <div class="signal-action" style="background:rgba(240,80,58,0.12);">
+          <div class="signal-action-label" style="color:rgba(240,80,58,0.9);">Immediate response</div>
+          <div class="signal-action-text" style="color:rgba(255,255,255,0.7);">Add protein to every meal for 3 days. Protein stabilises blood sugar and reduces sweet cravings within 48–72 hours.</div>
+        </div>
+      </div>
+
+      <div class="signal-card" style="background:rgba(245,166,35,0.12);">
+        <div class="signal-num" style="color:rgba(245,166,35,0.8);">Signal 03</div>
+        <div class="signal-title">Activity spontaneously drops</div>
+        <div class="signal-why" style="color:rgba(255,255,255,0.65);">When energy balance tilts negative — more calories in, fewer out — the brain reduces spontaneous movement first. You feel less inclined to walk, stand, move. This is metabolic adaptation in real time.</div>
+        <div class="signal-action" style="background:rgba(245,166,35,0.12);">
+          <div class="signal-action-label" style="color:rgba(245,166,35,0.9);">Immediate response</div>
+          <div class="signal-action-text" style="color:rgba(255,255,255,0.7);">Reinstate the post-meal walk (Module 02) for 5 consecutive days. That's enough to reset the activity baseline.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: CHECKLIST -->
+    <div class="slide slide-check" data-index="3">
+      <div class="s-title">Check in right now.</div>
+      <div class="s-sub">Tick what you've noticed in the last 7 days.</div>
+      <div class="check-items" id="checkItems">
+        <div class="check-item" onclick="toggleCheck(0)" data-score="1">
+          <div class="check-box" id="cb0"></div>
+          <div class="check-text">
+            <div class="check-label">My sleep quality has dropped</div>
+            <div class="check-sub">Taking longer to fall asleep, waking earlier, feeling less rested</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(1)" data-score="1">
+          <div class="check-box" id="cb1"></div>
+          <div class="check-text">
+            <div class="check-label">I've been craving sweet or salty foods more than usual</div>
+            <div class="check-sub">Noticeably stronger than your baseline</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(2)" data-score="1">
+          <div class="check-box" id="cb2"></div>
+          <div class="check-text">
+            <div class="check-label">I've been moving less spontaneously</div>
+            <div class="check-sub">Fewer walks, more sitting, less motivation to move</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(3)" data-score="0">
+          <div class="check-box" id="cb3"></div>
+          <div class="check-text">
+            <div class="check-label">My meals have been less structured</div>
+            <div class="check-sub">Skipping meals, eating at irregular times, less planning</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(4)" data-score="0">
+          <div class="check-box" id="cb4"></div>
+          <div class="check-text">
+            <div class="check-label">My energy and mood have been lower</div>
+            <div class="check-sub">Feeling more tired, less motivated, slightly flat</div>
+          </div>
+        </div>
+      </div>
+      <button onclick="showCheckResult()" style="background:var(--teal); border:none; border-radius:22px; padding:14px 28px; font-size:14px; font-weight:700; color:white; cursor:pointer; align-self:flex-start;">See my signal score →</button>
+      <div class="check-result" id="checkResult0" style="background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2);">
+        <div style="font-size:14px; font-weight:700; color:var(--green); margin-bottom:6px;">✓ All clear</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5;">No significant signals detected. Your habits are holding. Keep doing what you're doing — and keep completing your daily check-in so your AI can track the trend.</div>
+      </div>
+      <div class="check-result" id="checkResult1" style="background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.25);">
+        <div style="font-size:14px; font-weight:700; color:var(--amber); margin-bottom:6px;">⚡ Early signals present</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5;">1–2 signals checked. This is the right time to act — not later. Pick the signal that feels most true and apply its immediate response today. One change is enough to start.</div>
+      </div>
+      <div class="check-result" id="checkResult2" style="background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.25);">
+        <div style="font-size:14px; font-weight:700; color:var(--coral); margin-bottom:6px;">🔴 Multiple signals active</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5;">3 or more signals checked. The pattern is forming. Start with sleep — it's the master lever that controls the others. Fix sleep first. The rest will respond.</div>
+      </div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">MAINTAIN · Empowerment</div>
+      <div class="final-title">You now see<br>what most people<br>miss entirely.</div>
+      <div class="final-body">The 3 signals in this module are what your daily check-in is designed to track. Every day you complete it, your AI builds a clearer picture of your personal warning pattern — and will alert you before you need to ask.</div>
+      <div class="empowerment-box">
+        <div class="empowerment-title">What happens next in Maintain</div>
+        <div class="empowerment-text">Modules 07–08 shift from awareness to action — cold exposure for metabolism, and resistance training without a gym. The foundation you've built in these first 6 modules makes everything that follows easier.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">Module 07 — 30 seconds that wake your metabolism.</strong> Cold exposure, thermogenesis, and the simplest metabolic tool in your shower.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 5;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); });
+}
+function getClass(idx) {
+  if (idx===0) return 'slide slide-cover';
+  if (idx===3) return 'slide slide-check';
+  if (idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next=current+dir;
+  if(next<0||next>=total)return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--teal)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50)navigate(d>0?1:-1);
+},{passive:true});
+
+// CHECKLIST
+var checked = [false,false,false,false,false];
+function toggleCheck(idx) {
+  checked[idx] = !checked[idx];
+  var item = document.querySelectorAll('.check-item')[idx];
+  var box = document.getElementById('cb'+idx);
+  if (checked[idx]) {
+    item.classList.add('checked');
+  } else {
+    item.classList.remove('checked');
+  }
+}
+function showCheckResult() {
+  var count = checked.filter(Boolean).length;
+  document.getElementById('checkResult0').className = 'check-result';
+  document.getElementById('checkResult1').className = 'check-result';
+  document.getElementById('checkResult2').className = 'check-result';
+  if (count === 0) {
+    document.getElementById('checkResult0').className = 'check-result visible';
+  } else if (count <= 2) {
+    document.getElementById('checkResult1').className = 'check-result visible';
+  } else {
+    document.getElementById('checkResult2').className = 'check-result visible';
+  }
+}
+</script>
+</body>
+</html>

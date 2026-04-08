@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ncare · The heat that repairs</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --orange:#EA580C; --orange-l:#FFF7ED;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--orange); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--orange); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--orange); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(234,88,12,0.15); border:1px solid rgba(234,88,12,0.35); border-radius:20px; padding:6px 16px; font-size:12px; color:#FED7AA; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:40px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.7; margin-top:4px; line-height:1.4; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* HEAT TIMER */
+.slide-heat { background:linear-gradient(180deg, #1A0E00 0%, #0F172A 100%); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.heat-label { font-size:12px; font-weight:700; color:var(--orange); letter-spacing:2px; text-transform:uppercase; }
+.heat-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.heat-ring svg { transform:rotate(-90deg); }
+.heat-ring circle { fill:none; stroke-width:8; }
+.heat-ring .bg { stroke:rgba(255,255,255,0.06); }
+.heat-ring .progress { stroke:var(--orange); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.heat-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.heat-time { font-size:48px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.heat-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.heat-temp { font-size:12px; color:var(--orange); margin-top:2px; }
+.heat-msg { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.heat-btn { background:var(--orange); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.heat-btn.pause { background:rgba(255,255,255,0.1); }
+.heat-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); font-weight:600; display:none; }
+
+/* ACCESSIBLE ALTS */
+.alt-grid { display:flex; flex-direction:column; gap:8px; }
+.alt-card { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start; }
+.alt-emoji { font-size:24px; flex-shrink:0; }
+.alt-info { flex:1; }
+.alt-title { font-size:13px; font-weight:700; color:white; margin-bottom:4px; }
+.alt-desc { font-size:12px; color:rgba(255,255,255,0.5); line-height:1.4; }
+.alt-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; margin-top:4px; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(234,88,12,0.15); border:1px solid rgba(234,88,12,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#FED7AA; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.combo-box { background:rgba(234,88,12,0.1); border:1px solid rgba(234,88,12,0.2); border-radius:14px; padding:16px; }
+.combo-title { font-size:14px; font-weight:800; color:#FED7AA; margin-bottom:8px; }
+.combo-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🔥</div>
+      <div class="cover-title">The heat<br>that repairs.</div>
+      <div class="cover-sub">What your body does at 70°C is as powerful as a workout. And you can do it lying down.</div>
+      <div class="cover-tag">Module 11 — Sauna & heat therapy</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">20 min</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">What happens at 70°C.</div>
+      <div class="s-sub">Four biological responses — all metabolically relevant.</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="highlight-box" style="background:rgba(234,88,12,0.12); flex:1; min-width:120px;">
+          <div class="highlight-num" style="color:var(--orange);">+300%</div>
+          <div class="highlight-lbl" style="color:var(--orange);">Growth hormone</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">after a single 20-min session</div>
+        </div>
+        <div class="highlight-box" style="background:rgba(29,184,126,0.12); flex:1; min-width:120px;">
+          <div class="highlight-num" style="color:var(--green);">–40%</div>
+          <div class="highlight-lbl" style="color:var(--green);">Cardiovascular risk</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">with 4× weekly sauna use (KUOPIO study)</div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--orange);">4 repair mechanisms</div>
+        <div class="item"><div class="item-dot" style="background:var(--orange);"></div><div class="item-text"><strong>Heat shock proteins (HSPs)</strong> — repair damaged proteins, protect muscle fibres from breakdown, improve insulin receptor function.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Growth hormone surge</strong> — preserves muscle mass and mobilises fat stores during the session. The spike lasts 2–3 hours post-sauna.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Cortisol reduction</strong> — core body temperature rise followed by cool-down mimics the natural cortisol rhythm, helping to lower evening cortisol and improve sleep onset.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>BDNF increase</strong> — brain-derived neurotrophic factor rises after heat exposure — improving mood, reducing stress eating, and supporting cognitive function.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Source: Laukkanen J.A. et al., JAMA Internal Medicine (2015) · Scoon G.S. et al., J Sci Med Sport (2007) · Patrick R.P. et al., Med Hypotheses (2021)</div>
+      </div>
+    </div>
+
+    <!-- 2: PROTOCOL -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">The protocol.<br>Simple and effective.</div>
+      <div class="s-sub">20 minutes. 2–3 times per week. That's the minimum effective dose.</div>
+      <div class="tip-card" style="background:#FFF7ED; border-color:var(--orange);">
+        <div class="tip-title" style="color:var(--orange);">The session structure</div>
+        <div class="tip-text">Enter at 70–90°C. Sit or lie comfortably. Stay for 15–20 minutes. Exit and cool down for 5–10 minutes (cold shower optional but powerful — see Module 07). Rehydrate with 500ml water.</div>
+      </div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);">
+        <div class="tip-title" style="color:#B07518;">Timing for metabolism</div>
+        <div class="tip-text">Post-exercise sauna amplifies growth hormone release by up to 16× compared to sauna alone. If you've done your Module 08 circuit, a sauna within 30 minutes maximises the anabolic window.</div>
+      </div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);">
+        <div class="tip-title" style="color:#0670A0;">Timing for sleep</div>
+        <div class="tip-text">Evening sauna (6–8pm) causes the core temperature rise and fall that signals deep sleep onset. Many people report falling asleep faster and sleeping deeper on sauna days.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">⚠️ <strong style="color:var(--navy);">Safety:</strong> No sauna if pregnant, if you have uncontrolled hypertension, or recent cardiovascular event. Always exit if you feel dizzy or nauseous. Hydrate before and after.</div>
+      </div>
+    </div>
+
+    <!-- 3: TIMER -->
+    <div class="slide slide-heat" data-index="3">
+      <div class="heat-label">Sauna session timer</div>
+      <div class="heat-ring">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle class="bg" cx="100" cy="100" r="88"/>
+          <circle class="progress" id="heatCircle" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="553"/>
+        </svg>
+        <div class="heat-display">
+          <div class="heat-time" id="heatDisplay">20:00</div>
+          <div class="heat-unit">minutes</div>
+          <div class="heat-temp" id="heatTemp">🔥 70–90°C</div>
+        </div>
+      </div>
+      <div class="heat-msg" id="heatMsg">Step in. Settle. Tap start when ready.</div>
+      <button class="heat-btn" id="heatBtn" onclick="heatAction()">Start session →</button>
+      <div class="heat-done" id="heatDone">🔥 Session complete. Time to cool down.</div>
+    </div>
+
+    <!-- 4: ACCESSIBLE ALTERNATIVES -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">No sauna?<br>No problem.</div>
+      <div class="s-sub">Four alternatives that activate the same heat pathways — accessible anywhere.</div>
+      <div class="alt-grid">
+        <div class="alt-card">
+          <div class="alt-emoji">🛁</div>
+          <div class="alt-info">
+            <div class="alt-title">Hot bath — 40°C for 20 minutes</div>
+            <div class="alt-desc">Core temperature rise similar to sauna. Add Epsom salts for magnesium absorption — relaxes muscles and supports sleep. Studies show equivalent cardiovascular benefits to moderate exercise.</div>
+            <div class="alt-badge" style="background:rgba(29,184,126,0.15); color:var(--green);">Best alternative</div>
+          </div>
+        </div>
+        <div class="alt-card">
+          <div class="alt-emoji">🧖</div>
+          <div class="alt-info">
+            <div class="alt-title">Hammam / steam room</div>
+            <div class="alt-desc">Lower temperature (45–50°C) but high humidity increases perceived heat load. Easier to tolerate for beginners. Available in most public pools and sports centres.</div>
+            <div class="alt-badge" style="background:rgba(245,166,35,0.15); color:var(--amber);">Good option</div>
+          </div>
+        </div>
+        <div class="alt-card">
+          <div class="alt-emoji">🚿</div>
+          <div class="alt-info">
+            <div class="alt-title">Contrast shower — hot/cold cycling</div>
+            <div class="alt-desc">2 min hot, 30 sec cold × 3 rounds. Activates both heat shock proteins AND cold thermogenesis (Module 07). The most accessible protocol if you have no other option.</div>
+            <div class="alt-badge" style="background:rgba(8,145,178,0.15); color:var(--teal);">Daily option</div>
+          </div>
+        </div>
+        <div class="alt-card">
+          <div class="alt-emoji">🧘</div>
+          <div class="alt-info">
+            <div class="alt-title">Infrared sauna blanket</div>
+            <div class="alt-desc">Home infrared devices reach 55–65°C and penetrate tissue differently. Increasingly accessible (£100–200). Studies show similar cortisol reduction and growth hormone benefits.</div>
+            <div class="alt-badge" style="background:rgba(234,88,12,0.15); color:var(--orange);">Home option</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: FINAL -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">MAINTAIN · The repair ritual</div>
+      <div class="final-title">Heat repairs<br>what exercise<br>and food cannot.</div>
+      <div class="final-body">Recovery is not passive. The sauna — or its alternatives — is active recovery: your body rebuilding, repairing, and rebalancing hormones while you rest. It's the most underused tool in metabolic health.</div>
+      <div class="combo-box">
+        <div class="combo-title">The winning combination</div>
+        <div class="combo-text">Module 07 (cold) + Module 08 (resistance) + Module 11 (heat): 20-minute circuit → sauna → cold shower. This sequence — done twice a week — combines every major non-dietary metabolic lever available to you without a prescription.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Final module → <strong style="color:white;">Module 12 — You don't need us anymore.</strong> Your 3-month review, your personal maintenance plan, and your exit from the programme.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=6;
+var slides=document.querySelectorAll('.slide');
+var dots=[];
+var bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots(){
+  dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); });
+}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-white';
+  if(idx===3) return 'slide slide-heat';
+  if(idx===5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--orange)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+// HEAT TIMER 20 MIN
+var hRunning=false,hDone=false;
+var hTotal=1200,hRemaining=1200;
+var hInterval=null;
+var circ=553;
+var hMsgs={900:'15 minutes in. You\'re past the halfway point.',600:'10 minutes left. Growth hormone is peaking.',300:'5 minutes. The hardest part is already done.',60:'Almost there. One final minute.'};
+
+function hFmt(s){ return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+function heatAction(){
+  if(hDone) return;
+  if(!hRunning){
+    hRunning=true;
+    document.getElementById('heatBtn').textContent='Pause';
+    document.getElementById('heatBtn').className='heat-btn pause';
+    document.getElementById('heatMsg').textContent='Breathe slowly. Let the heat work.';
+    hInterval=setInterval(function(){
+      hRemaining--;
+      document.getElementById('heatDisplay').textContent=hFmt(hRemaining);
+      var progress=(hTotal-hRemaining)/hTotal;
+      document.getElementById('heatCircle').style.strokeDashoffset=circ*(1-progress);
+      if(hMsgs[hRemaining]) document.getElementById('heatMsg').textContent=hMsgs[hRemaining];
+      if(hRemaining<=0){
+        clearInterval(hInterval);
+        hDone=true; hRunning=false;
+        document.getElementById('heatDisplay').textContent='✓';
+        document.getElementById('heatTemp').textContent='';
+        document.getElementById('heatMsg').textContent='Exit when ready. Cool down slowly.';
+        document.getElementById('heatBtn').style.display='none';
+        document.getElementById('heatDone').style.display='block';
+        document.getElementById('heatCircle').style.stroke='var(--green)';
+      }
+    },1000);
+  } else {
+    hRunning=false;
+    clearInterval(hInterval);
+    document.getElementById('heatBtn').textContent='Resume →';
+    document.getElementById('heatBtn').className='heat-btn';
+    document.getElementById('heatMsg').textContent='Paused. Stay in if you can.';
+  }
+}
+</script>
+</body>
+</html>
