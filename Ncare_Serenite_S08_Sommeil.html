@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · Sleep as medicine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --indigo:#4F46E5; --indigo-l:#EEF2FF;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--indigo); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--indigo); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--indigo); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(79,70,229,0.15); border:1px solid rgba(79,70,229,0.35); border-radius:20px; padding:6px 16px; font-size:12px; color:#A5B4FC; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* SLEEP ARCH */
+.arch-wrap { background:var(--navy2); border-radius:16px; padding:16px; }
+.arch-title { font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+.arch-stages { display:flex; flex-direction:column; gap:6px; }
+.arch-stage { display:flex; gap:10px; align-items:center; }
+.arch-bar-wrap { flex:1; background:rgba(255,255,255,0.06); border-radius:3px; height:12px; }
+.arch-bar { height:100%; border-radius:3px; }
+.arch-label { font-size:11px; color:rgba(255,255,255,0.5); min-width:70px; }
+.arch-pct { font-size:11px; font-weight:700; min-width:30px; text-align:right; }
+.arch-note { font-size:11px; color:rgba(255,255,255,0.35); margin-top:8px; line-height:1.5; }
+
+/* PROTOCOL TIMELINE */
+.timeline { display:flex; flex-direction:column; gap:0; }
+.tl-item { display:flex; gap:14px; }
+.tl-time-col { display:flex; flex-direction:column; align-items:center; width:52px; flex-shrink:0; }
+.tl-time { font-size:12px; font-weight:700; color:var(--indigo); }
+.tl-line { flex:1; width:2px; background:rgba(79,70,229,0.2); margin:4px 0; min-height:20px; }
+.tl-content { background:var(--navy2); border-radius:12px; padding:12px 14px; margin-bottom:8px; flex:1; }
+.tl-title { font-size:13px; font-weight:700; color:white; margin-bottom:3px; }
+.tl-desc { font-size:12px; color:rgba(255,255,255,0.5); line-height:1.4; }
+
+/* BODY SCAN TIMER */
+.slide-scan { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.scan-label { font-size:12px; font-weight:700; color:var(--indigo); letter-spacing:2px; text-transform:uppercase; }
+.scan-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.scan-ring svg { transform:rotate(-90deg); }
+.scan-ring circle { fill:none; stroke-width:8; }
+.scan-ring .bg { stroke:rgba(255,255,255,0.08); }
+.scan-ring .prog { stroke:var(--indigo); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.scan-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.scan-time { font-size:44px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.scan-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.scan-zone { font-size:12px; color:var(--indigo); margin-top:2px; }
+.scan-msg { font-size:13px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.scan-btn { background:var(--indigo); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.scan-btn.pause { background:rgba(255,255,255,0.1); }
+.scan-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); display:none; text-align:center; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0D0F2A 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(79,70,229,0.15); border:1px solid rgba(79,70,229,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#A5B4FC; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.rule-box { background:rgba(79,70,229,0.1); border:1px solid rgba(79,70,229,0.2); border-radius:14px; padding:16px; }
+.rule-title { font-size:14px; font-weight:800; color:#A5B4FC; margin-bottom:8px; }
+.rule-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🌙</div>
+      <div class="cover-title">Sleep as medicine.</div>
+      <div class="cover-sub">You can't out-habit bad sleep. Fix the sleep, and everything else becomes easier.</div>
+      <div class="cover-tag">Module S08 — Sleep protocol</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">10'</div><div class="stat-lbl">body scan</div></div>
+        <div class="stat"><div class="stat-num">Protocol</div><div class="stat-lbl">7 days</div></div>
+      </div>
+    </div>
+
+    <!-- 1: WHY SLEEP FIRST -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Sleep is the master lever.<br>Everything else is downstream.</div>
+      <div class="s-sub">One bad night changes your biology in ways that take 3 days to recover.</div>
+      <div style="display:flex; gap:10px;">
+        <div style="background:rgba(240,80,58,0.1);border-radius:14px;padding:14px;flex:1;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#FCA5A5;line-height:1;">+37%</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;line-height:1.3;">Cortisol after one poor night</div>
+        </div>
+        <div style="background:rgba(245,166,35,0.1);border-radius:14px;padding:14px;flex:1;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#FCD34D;line-height:1;">+24%</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;line-height:1.3;">Hunger hormone (ghrelin) next day</div>
+        </div>
+      </div>
+      <div class="arch-wrap">
+        <div class="arch-title">What happens while you sleep — by stage</div>
+        <div class="arch-stages">
+          <div class="arch-stage">
+            <div class="arch-label" style="color:#A5B4FC;">Light (N1-N2)</div>
+            <div class="arch-bar-wrap"><div class="arch-bar" style="width:50%;background:rgba(79,70,229,0.5);"></div></div>
+            <div class="arch-pct" style="color:#A5B4FC;">50%</div>
+          </div>
+          <div class="arch-stage">
+            <div class="arch-label" style="color:var(--teal);">Deep (N3)</div>
+            <div class="arch-bar-wrap"><div class="arch-bar" style="width:22%;background:rgba(8,145,178,0.7);"></div></div>
+            <div class="arch-pct" style="color:var(--teal);">22%</div>
+          </div>
+          <div class="arch-stage">
+            <div class="arch-label" style="color:var(--coral);">REM</div>
+            <div class="arch-bar-wrap"><div class="arch-bar" style="width:23%;background:rgba(240,80,58,0.6);"></div></div>
+            <div class="arch-pct" style="color:var(--coral);">23%</div>
+          </div>
+        </div>
+        <div class="arch-note">Deep sleep (N3) repairs the body and resets cortisol. REM processes emotions and consolidates memory. Chronic stress suppresses both — you sleep but don't recover.</div>
+      </div>
+      <div class="card-dark">
+        <div class="item"><div class="item-dot" style="background:var(--indigo);"></div><div class="item-text"><strong>The tired-but-wired pattern</strong> is classic N3 suppression. High evening cortisol blocks deep sleep entry. You sleep 7 hours but feel like 4.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: THE PROTOCOL -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">The 7-day sleep<br>rebuild protocol.</div>
+      <div class="s-sub">One change per evening. Cumulative effect within a week.</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-time-col"><div class="tl-time">–3h</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Last intense exercise</div><div class="tl-desc">Evening HIIT raises core temp and cortisol for 3 hours. Gentle movement only after this point.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time-col"><div class="tl-time">–2h</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Last heavy meal</div><div class="tl-desc">Digestion raises core temperature. Sleep onset requires body temp to drop. Give it 2 hours.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time-col"><div class="tl-time">–1h</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Screens off — dim lights</div><div class="tl-desc">Blue light and cognitive stimulation block melatonin. One hour is the minimum deactivation window.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time-col"><div class="tl-time">–20m</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title" style="color:var(--indigo);">Body scan — 10 minutes</div><div class="tl-desc">Progressive muscle relaxation activates the parasympathetic system. Cortisol drops within 10 minutes. Timer in next slide.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time-col"><div class="tl-time">Sleep</div></div>
+          <div class="tl-content" style="margin-bottom:0;"><div class="tl-title" style="color:var(--green);">Same time every night</div><div class="tl-desc">The most powerful sleep intervention. Consistency trains your circadian clock — no supplement comes close.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: BODY SCAN TIMER -->
+    <div class="slide slide-scan" data-index="3">
+      <div class="scan-label">Body scan · 10 min</div>
+      <div class="scan-ring">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle class="bg" cx="100" cy="100" r="88"/>
+          <circle class="prog" id="scanCircle" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="553"/>
+        </svg>
+        <div class="scan-display">
+          <div class="scan-time" id="scanDisplay">10:00</div>
+          <div class="scan-unit">minutes</div>
+          <div class="scan-zone" id="scanZone">Ready</div>
+        </div>
+      </div>
+      <div class="scan-msg" id="scanMsg">Lie down. Close your eyes. Tap start.</div>
+      <button class="scan-btn" id="scanBtn" onclick="scanAction()">Begin scan →</button>
+      <div class="scan-done" id="scanDone">Body scan complete. Sleep is close.</div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Sleep as the foundation</div>
+      <div class="final-title">Fix sleep first.<br>Everything else<br>becomes easier.</div>
+      <div class="final-body">When your PSQI score improves, your PSS-10 will follow within 2 weeks — without any other change. Sleep is the intervention that makes all other interventions work better.</div>
+      <div class="rule-box">
+        <div class="rule-title">The one non-negotiable</div>
+        <div class="rule-text">Same wake time every day — including weekends. This is more impactful than any sleep supplement, sleep hygiene tip, or relaxation technique. Your body runs on a clock. Give it a fixed anchor and it will do the rest.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S09 — The worry window.</strong> A structured 15-minute space that empties your mind before sleep — without suppressing or avoiding.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===3) return 'slide slide-scan';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--indigo)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+// BODY SCAN TIMER
+var sRun=false,sDone=false,sRemain=600,sTotal=600,sInt=null;
+var zones=[
+  {t:600,z:'Feet & legs',m:'Notice your feet. Let them soften. Release any tension in your calves and thighs.'},
+  {t:480,z:'Hips & abdomen',m:'Let your hips drop heavy. Soften the belly. Each exhale releases a little more.'},
+  {t:360,z:'Chest & back',m:'Feel your chest rise and fall. Release your shoulder blades into the surface beneath you.'},
+  {t:240,z:'Arms & hands',m:'Let your arms become heavy. Fingers uncurl. Nothing to hold.'},
+  {t:120,z:'Face & jaw',m:'Unclench your jaw. Soften the muscles around your eyes. Forehead smooth.'},
+  {t:30,z:'Whole body',m:'Your whole body is heavy and still. Sleep is close.'}
+];
+function tFmt(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+function scanAction(){
+  if(sDone) return;
+  if(!sRun){
+    sRun=true;
+    document.getElementById('scanBtn').textContent='Pause';
+    document.getElementById('scanBtn').className='scan-btn pause';
+    var z=zones[0];
+    document.getElementById('scanZone').textContent=z.z;
+    document.getElementById('scanMsg').textContent=z.m;
+    sInt=setInterval(function(){
+      sRemain--;
+      document.getElementById('scanDisplay').textContent=tFmt(sRemain);
+      var p=(sTotal-sRemain)/sTotal;
+      document.getElementById('scanCircle').style.strokeDashoffset=553*(1-p);
+      for(var i=zones.length-1;i>=0;i--){
+        if(sRemain<=zones[i].t&&sRemain>=(i<zones.length-1?zones[i+1].t:0)){
+          document.getElementById('scanZone').textContent=zones[i].z;
+          document.getElementById('scanMsg').textContent=zones[i].m;
+          break;
+        }
+      }
+      if(sRemain<=0){
+        clearInterval(sInt);sDone=true;sRun=false;
+        document.getElementById('scanDisplay').textContent='✓';
+        document.getElementById('scanZone').textContent='';
+        document.getElementById('scanMsg').textContent='';
+        document.getElementById('scanBtn').style.display='none';
+        document.getElementById('scanDone').style.display='block';
+        document.getElementById('scanCircle').style.stroke='var(--green)';
+      }
+    },1000);
+  } else {
+    sRun=false;clearInterval(sInt);
+    document.getElementById('scanBtn').textContent='Resume →';
+    document.getElementById('scanBtn').className='scan-btn';
+    document.getElementById('scanMsg').textContent='Paused. Stay still.';
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

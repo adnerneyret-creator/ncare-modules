@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · The food-mood connection</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --olive:#65A30D; --olive-l:#F7FEE7;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--olive); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--olive); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--olive); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(101,163,13,0.15); border:1px solid rgba(101,163,13,0.35); border-radius:20px; padding:6px 16px; font-size:12px; color:#BEF264; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* FOOD GRID */
+.food-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.food-card { border-radius:14px; padding:14px; }
+.food-emoji { font-size:28px; margin-bottom:8px; }
+.food-name { font-size:13px; font-weight:700; margin-bottom:4px; }
+.food-why { font-size:11px; line-height:1.4; opacity:0.75; }
+
+/* VS TABLE */
+.vs-row { display:flex; gap:8px; align-items:stretch; margin-bottom:8px; }
+.vs-left { flex:1; background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.2); border-radius:12px; padding:12px; }
+.vs-right { flex:1; background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2); border-radius:12px; padding:12px; }
+.vs-tag { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.vs-content { font-size:12px; line-height:1.5; }
+
+/* QUIZ */
+.slide-quiz { background:var(--navy); }
+.quiz-q { font-size:18px; font-weight:800; color:white; line-height:1.4; }
+.quiz-sub { font-size:13px; color:rgba(255,255,255,0.4); }
+.quiz-opts { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:var(--navy2); border:2px solid transparent; border-radius:14px; padding:14px 16px; cursor:pointer; transition:all 0.2s; }
+.quiz-opt.right { border-color:var(--green); background:rgba(29,184,126,0.08); }
+.quiz-opt.wrong { border-color:var(--coral); background:rgba(240,80,58,0.08); }
+.quiz-opt.revealed { border-color:var(--green); background:rgba(29,184,126,0.05); }
+.quiz-label { font-size:14px; color:white; font-weight:500; }
+.quiz-explain { font-size:12px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4; display:none; }
+.quiz-explain.show { display:block; }
+.quiz-result { display:none; background:var(--navy2); border-radius:12px; padding:12px 14px; }
+.quiz-result.show { display:block; }
+
+/* RECIPE */
+.recipe-card { background:var(--navy2); border-radius:16px; padding:16px; }
+.recipe-title { font-size:15px; font-weight:800; color:white; margin-bottom:4px; }
+.recipe-time { font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:12px; }
+.recipe-ing { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.recipe-dot { width:5px; height:5px; border-radius:50%; background:var(--olive); flex-shrink:0; }
+.recipe-ing-text { font-size:13px; color:rgba(255,255,255,0.8); }
+.recipe-step { font-size:12px; color:rgba(255,255,255,0.55); line-height:1.6; background:rgba(255,255,255,0.04); border-radius:10px; padding:10px 12px; margin-top:8px; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0D1A05 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(101,163,13,0.15); border:1px solid rgba(101,163,13,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#BEF264; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.rule-box { background:rgba(101,163,13,0.1); border:1px solid rgba(101,163,13,0.25); border-radius:14px; padding:16px; }
+.rule-title { font-size:14px; font-weight:800; color:#BEF264; margin-bottom:8px; }
+.rule-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🥗</div>
+      <div class="cover-title">The food-mood<br>connection.</div>
+      <div class="cover-sub">What you eat at 8am changes how anxious you feel at 3pm. The connection is direct.</div>
+      <div class="cover-tag">Module S06 — Nutrition & cortisol</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Quiz</div><div class="stat-lbl">+ recipe</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE GUT-BRAIN AXIS -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">95% of serotonin<br>is made in your gut.</div>
+      <div class="s-sub">The gut-brain axis runs both ways. What you eat changes how you feel — within hours.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--olive);">The direct pathway</div>
+        <div class="item"><div class="item-dot" style="background:var(--olive);"></div><div class="item-text"><strong>Gut microbiome → neurotransmitters.</strong> Your gut bacteria produce serotonin, GABA, and dopamine precursors. Feed the right bacteria and mood chemistry improves measurably.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Blood sugar → cortisol.</strong> Every glucose spike triggers an insulin response. When blood sugar crashes, cortisol rises to compensate. Stable blood sugar = lower baseline anxiety.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Inflammation → depression.</strong> Inflammatory foods (sugar, seed oils, ultra-processed) activate cytokines that cross the blood-brain barrier and directly impair mood regulation.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(101,163,13,0.08); border:1px solid rgba(101,163,13,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:13px; line-height:1.6;">You don't need a special diet. You need to <strong style="color:#BEF264;">shift the ratio</strong> — more foods that stabilise blood sugar and feed beneficial gut bacteria. Fewer that spike insulin and inflame.</div>
+      </div>
+    </div>
+
+    <!-- 2: THE FOODS -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">3 that calm.<br>3 to reduce.</div>
+      <div class="s-sub">No elimination diet. Just direction.</div>
+      <div class="food-grid">
+        <div class="food-card" style="background:rgba(101,163,13,0.12);">
+          <div class="food-emoji">🫐</div>
+          <div class="food-name" style="color:#BEF264;">Berries</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Anthocyanins reduce neuroinflammation. Frozen work as well as fresh.</div>
+        </div>
+        <div class="food-card" style="background:rgba(8,145,178,0.12);">
+          <div class="food-emoji">🐟</div>
+          <div class="food-name" style="color:#7DD3FC;">Fatty fish</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Omega-3 EPA/DHA directly lower cortisol and reduce HPA axis reactivity.</div>
+        </div>
+        <div class="food-card" style="background:rgba(245,166,35,0.12);">
+          <div class="food-emoji">🥜</div>
+          <div class="food-name" style="color:var(--amber);">Magnesium foods</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Almonds, dark chocolate, leafy greens. Mg deficiency amplifies cortisol response by 2×.</div>
+        </div>
+        <div class="food-card" style="background:rgba(240,80,58,0.12);">
+          <div class="food-emoji">🍬</div>
+          <div class="food-name" style="color:#FCA5A5;">Refined sugar</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Spikes blood glucose → insulin crash → cortisol rises to compensate. Daily cycle of manufactured stress.</div>
+        </div>
+        <div class="food-card" style="background:rgba(240,80,58,0.12);">
+          <div class="food-emoji">☕</div>
+          <div class="food-name" style="color:#FCA5A5;">Caffeine after 2pm</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Stimulates cortisol release. Stacks on afternoon cortisol. Disrupts sleep architecture — which raises tomorrow's stress.</div>
+        </div>
+        <div class="food-card" style="background:rgba(240,80,58,0.12);">
+          <div class="food-emoji">🍺</div>
+          <div class="food-name" style="color:#FCA5A5;">Alcohol at night</div>
+          <div class="food-why" style="color:rgba(255,255,255,0.6);">Sedates initially, then fragments sleep and suppresses REM. Cortisol rebounds at 3am — the classic "anxiety at 3am" pattern.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: QUIZ -->
+    <div class="slide slide-quiz" data-index="3">
+      <div class="quiz-q">You feel anxious at 3pm every day. What's most likely causing it?</div>
+      <div class="quiz-sub">One right answer. Think about the timing.</div>
+      <div class="quiz-opts">
+        <div class="quiz-opt" id="qo0" onclick="answerQuiz(0, false)">
+          <div class="quiz-label">Too much screen time in the afternoon</div>
+          <div class="quiz-explain" id="qe0">Screens contribute to stress but don't explain the precise 3pm timing. The pattern is too regular to be random.</div>
+        </div>
+        <div class="quiz-opt" id="qo1" onclick="answerQuiz(1, true)">
+          <div class="quiz-label">A blood sugar crash from lunch triggering a cortisol spike</div>
+          <div class="quiz-explain" id="qe1">Correct. A high-carb lunch (without enough protein) causes a glucose spike around noon, followed by an insulin-driven crash 2–3 hours later. Cortisol rises to bring blood sugar back up — and you feel it as anxiety. Fix: add protein and fat to lunch. ✓</div>
+        </div>
+        <div class="quiz-opt" id="qo2" onclick="answerQuiz(2, false)">
+          <div class="quiz-label">Work stress accumulating through the day</div>
+          <div class="quiz-explain" id="qe2">Work stress is real but produces a gradual rise, not a precise 3pm spike. The regularity of the pattern points to a physiological — not psychological — trigger.</div>
+        </div>
+      </div>
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+
+    <!-- 4: RECIPE + FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · The calm meal</div>
+      <div class="final-title">One recipe.<br>All three calming<br>nutrients. 10 minutes.</div>
+      <div class="final-body">This meal stabilises blood sugar for 4+ hours, delivers omega-3 and magnesium, and feeds beneficial gut bacteria. Make it once a week — your 3pm will change.</div>
+      <div class="recipe-card">
+        <div class="recipe-title">🥗 The Sérénité bowl</div>
+        <div class="recipe-time">⏱ 10 min · 1 serving · Cortisol-stabilising</div>
+        <div class="recipe-ing"><div class="recipe-dot"></div><div class="recipe-ing-text">100g tinned salmon or sardines</div></div>
+        <div class="recipe-ing"><div class="recipe-dot"></div><div class="recipe-ing-text">Large handful spinach or rocket</div></div>
+        <div class="recipe-ing"><div class="recipe-dot"></div><div class="recipe-ing-text">½ avocado (magnesium + healthy fat)</div></div>
+        <div class="recipe-ing"><div class="recipe-dot"></div><div class="recipe-ing-text">Handful blueberries or raspberries</div></div>
+        <div class="recipe-ing"><div class="recipe-dot"></div><div class="recipe-ing-text">10 almonds, olive oil, lemon</div></div>
+        <div class="recipe-step">Combine. Dress with olive oil and lemon. Done. Protein + omega-3 + magnesium + anthocyanins + fibre — everything your nervous system needs in one bowl.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S07 — Digital detox · The one hour rule.</strong> How screens hijack your nervous system — and the one change that fixes it.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===3) return 'slide slide-quiz';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--olive)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+var answered=false;
+function answerQuiz(idx,correct){
+  if(answered) return;
+  answered=true;
+  for(var i=0;i<3;i++){
+    document.getElementById('qe'+i).className='quiz-explain show';
+    document.getElementById('qo'+i).className='quiz-opt revealed';
+  }
+  document.getElementById('qo'+idx).className='quiz-opt '+(correct?'right':'wrong');
+  var r=document.getElementById('quizResult');
+  r.className='quiz-result show';
+  r.innerHTML=correct
+    ?'<span style="font-size:13px;color:var(--green);">✓ Correct. Add protein and fat to your next lunch — and notice your 3pm.</span>'
+    :'<span style="font-size:13px;color:var(--amber);">→ The answer is the blood sugar crash. Scroll up to see why the timing is the clue.</span>';
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · The breath that changes everything</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0C4A6E;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --amber:#F5A623;
+  --purple:#7C3AED; --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--teal); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--teal); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--teal); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* BREATHING EXERCISE */
+.slide-breath { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.breath-label { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:2px; text-transform:uppercase; }
+.breath-circle-wrap { position:relative; width:220px; height:220px; margin:0 auto; }
+.breath-circle { width:220px; height:220px; border-radius:50%; border:3px solid rgba(8,145,178,0.2); display:flex; align-items:center; justify-content:center; transition:transform 4s ease-in-out, background 4s ease-in-out; background:rgba(8,145,178,0.05); }
+.breath-circle.inhale { transform:scale(1.3); background:rgba(8,145,178,0.15); }
+.breath-circle.exhale { transform:scale(0.85); background:rgba(8,145,178,0.03); }
+.breath-circle.hold { transform:scale(1.3); background:rgba(8,145,178,0.12); }
+.breath-inner { text-align:center; }
+.breath-phase { font-size:22px; font-weight:800; color:white; margin-bottom:4px; transition:opacity 0.5s; }
+.breath-count { font-size:48px; font-weight:900; color:var(--teal); line-height:1; font-variant-numeric:tabular-nums; }
+.breath-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.breath-msg { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.breath-btn { background:var(--teal); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.breath-btn.stop { background:rgba(255,255,255,0.1); }
+.breath-progress { display:flex; gap:6px; justify-content:center; }
+.breath-cycle { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.15); transition:background 0.3s; }
+.breath-cycle.done { background:var(--teal); }
+.breath-cycle.active { background:rgba(8,145,178,0.5); }
+.breath-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); font-weight:600; display:none; text-align:center; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0C2A3A 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--teal); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.protocol-box { background:rgba(8,145,178,0.1); border:1px solid rgba(8,145,178,0.2); border-radius:14px; padding:16px; }
+.protocol-title { font-size:14px; font-weight:800; color:var(--teal); margin-bottom:10px; }
+.protocol-item { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.protocol-item:last-child { margin-bottom:0; }
+.protocol-dot { width:6px; height:6px; border-radius:50%; background:var(--teal); flex-shrink:0; }
+.protocol-text { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🫁</div>
+      <div class="cover-title">The breath that<br>changes everything.</div>
+      <div class="cover-sub">5 minutes. No app. No equipment. The most powerful tool your nervous system has.</div>
+      <div class="cover-tag">Module S02 — Cardiac coherence</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">5'</div><div class="stat-lbl">exercise</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">guided</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">The vagus nerve.<br>Your built-in off switch.</div>
+      <div class="s-sub">It connects your brain to your gut, heart, and lungs. And you can activate it voluntarily.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">Two modes. One switch.</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Sympathetic (stress mode):</strong> heart rate up, digestion off, muscles tense, cortisol rising. Triggered by short inhales, shallow breathing, held breath.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Parasympathetic (recovery mode):</strong> heart rate down, digestion on, muscles relax, cortisol drops. Triggered by <strong>slow, extended exhales.</strong></div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.2);">
+        <div class="card-title" style="color:var(--teal);">Why the exhale is the key</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text">When you exhale slowly, your heart rate decreases. This activates the vagus nerve. Which signals the brain: <strong>the threat is over.</strong> Cortisol drops within 90 seconds.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text">Cardiac coherence — breathing at exactly 5 breaths per minute — synchronises heart and brain rhythms. Effect lasts 4–6 hours after a single 5-minute session.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.03);">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Source: Lehrer P.M. et al., Applied Psychophysiology & Biofeedback (2014) · Porges S.W., Polyvagal Theory (2011)</div>
+      </div>
+    </div>
+
+    <!-- 2: THE PROTOCOLS -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">Three protocols.<br>One for every situation.</div>
+      <div class="s-sub">Different needs. Different rhythms. All scientifically validated.</div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);">
+        <div class="tip-title" style="color:var(--teal-d);">Cardiac coherence — 5-5 · Daily maintenance</div>
+        <div class="tip-text">Inhale 5 seconds, exhale 5 seconds. 5 minutes = 5 breaths/min. The gold standard for HRV improvement and cortisol regulation. Use morning, midday, evening.</div>
+      </div>
+      <div class="tip-card" style="background:#F5F3FF; border-color:var(--purple);">
+        <div class="tip-title" style="color:#5B21B6;">4-7-8 — Acute stress response</div>
+        <div class="tip-text">Inhale 4 sec, hold 7 sec, exhale 8 sec. Activates the parasympathetic system rapidly. Use before a difficult conversation, presentation, or moment of panic.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#0F5132;">Physiological sigh — Emergency reset</div>
+        <div class="tip-text">Double inhale through the nose (sniff-sniff), then one long exhale through the mouth. Instantly deflates the lungs' air sacs, rapidly activating the vagus nerve. Works in 1 breath.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💡 <strong style="color:var(--navy);">The 3-3-3 rule:</strong> 3 sessions per day, 3 minutes minimum, 3 weeks to feel the structural change. Before that — you'll feel calmer after each session. The baseline shifts over weeks.</div>
+      </div>
+    </div>
+
+    <!-- 3: BREATHING EXERCISE -->
+    <div class="slide slide-breath" data-index="3">
+      <div class="breath-label">Cardiac coherence · 5-5</div>
+      <div class="breath-circle-wrap">
+        <div class="breath-circle" id="breathCircle">
+          <div class="breath-inner">
+            <div class="breath-phase" id="breathPhase">Ready</div>
+            <div class="breath-count" id="breathCount">5</div>
+            <div class="breath-unit" id="breathUnit">seconds</div>
+          </div>
+        </div>
+      </div>
+      <div class="breath-progress" id="breathProgress"></div>
+      <div class="breath-msg" id="breathMsg">5 cycles · 5 minutes · Tap start when you're ready.</div>
+      <button class="breath-btn" id="breathBtn" onclick="breathAction()">Start breathing →</button>
+      <div class="breath-done" id="breathDone">Your nervous system just reset. Effect lasts 4–6 hours.</div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Daily habit</div>
+      <div class="final-title">5 minutes.<br>3 times a day.<br>That's the prescription.</div>
+      <div class="final-body">The 365 method: morning, midday, evening. Each session takes 5 minutes. Together they create a new cortisol baseline within 3 weeks — measurable in your PSS-10 scores.</div>
+      <div class="protocol-box">
+        <div class="protocol-title">Your daily breathing protocol</div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Morning:</strong> Before checking your phone. Sets cortisol rhythm for the day.</div></div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Midday:</strong> After lunch. Interrupts the afternoon cortisol build-up.</div></div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Evening:</strong> Before dinner or after work. Signals the transition from stress to recovery mode.</div></div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S03 — What cortisol does to your body.</strong> The biology of chronic stress — and exactly which habits interrupt it.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0, total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[], bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d); dots.push(d);
+}
+function updateDots(){ dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); }); }
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-white';
+  if(idx===3) return 'slide slide-breath';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next; slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--teal)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+// BREATHING ENGINE
+var breathRunning=false, breathDone=false;
+var breathInterval=null, countInterval=null;
+var totalCycles=5, currentCycle=0;
+var phases=[
+  {name:'Inhale', duration:5, class:'inhale'},
+  {name:'Exhale', duration:5, class:'exhale'}
+];
+var phaseIdx=0, countDown=5;
+
+function buildCycles(){
+  var p=document.getElementById('breathProgress');
+  p.innerHTML='';
+  for(var i=0;i<totalCycles;i++){
+    var c=document.createElement('div');
+    c.className='breath-cycle'; c.id='bc'+i; p.appendChild(c);
+  }
+}
+buildCycles();
+
+function breathAction(){
+  if(breathDone) return;
+  if(!breathRunning){
+    breathRunning=true;
+    document.getElementById('breathBtn').textContent='Pause';
+    document.getElementById('breathBtn').className='breath-btn stop';
+    document.getElementById('breathMsg').textContent='Breathe slowly. Follow the circle.';
+    runPhase();
+  } else {
+    breathRunning=false;
+    clearTimeout(breathInterval); clearInterval(countInterval);
+    document.getElementById('breathBtn').textContent='Resume →';
+    document.getElementById('breathBtn').className='breath-btn';
+    document.getElementById('breathMsg').textContent='Paused. Tap to resume.';
+  }
+}
+
+function runPhase(){
+  if(!breathRunning) return;
+  var phase=phases[phaseIdx];
+  countDown=phase.duration;
+  document.getElementById('breathPhase').textContent=phase.name;
+  document.getElementById('breathCount').textContent=countDown;
+  document.getElementById('breathUnit').textContent='seconds';
+  var circle=document.getElementById('breathCircle');
+  circle.className='breath-circle '+phase.class;
+  clearInterval(countInterval);
+  countInterval=setInterval(function(){
+    countDown--;
+    document.getElementById('breathCount').textContent=countDown;
+    if(countDown<=0){
+      clearInterval(countInterval);
+      nextPhase();
+    }
+  },1000);
+}
+
+function nextPhase(){
+  phaseIdx=(phaseIdx+1)%phases.length;
+  if(phaseIdx===0){
+    currentCycle++;
+    if(currentCycle<totalCycles){
+      document.getElementById('bc'+(currentCycle-1)).className='breath-cycle done';
+      document.getElementById('bc'+currentCycle).className='breath-cycle active';
+    }
+    if(currentCycle>=totalCycles){
+      finishBreath(); return;
+    }
+  }
+  if(breathRunning) runPhase();
+}
+
+function finishBreath(){
+  breathDone=true; breathRunning=false;
+  clearInterval(countInterval);
+  for(var i=0;i<totalCycles;i++) document.getElementById('bc'+i).className='breath-cycle done';
+  document.getElementById('breathCircle').className='breath-circle';
+  document.getElementById('breathCircle').style.background='rgba(29,184,126,0.15)';
+  document.getElementById('breathCircle').style.borderColor='rgba(29,184,126,0.4)';
+  document.getElementById('breathPhase').textContent='Done';
+  document.getElementById('breathCount').textContent='✓';
+  document.getElementById('breathUnit').textContent='';
+  document.getElementById('breathMsg').textContent='5 cycles complete.';
+  document.getElementById('breathBtn').style.display='none';
+  document.getElementById('breathDone').style.display='block';
+}
+
+document.getElementById('bc0').className='breath-cycle active';
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

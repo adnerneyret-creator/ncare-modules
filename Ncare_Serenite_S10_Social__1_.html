@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · Who drains you, who recharges you</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --pink:#DB2777; --pink-l:#FDF2F8;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--pink); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--pink); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--pink); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(219,39,119,0.15); border:1px solid rgba(219,39,119,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:#F9A8D4; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* AUDIT SLIDE */
+.slide-audit { background:var(--navy); }
+.audit-intro { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; }
+.audit-cols { display:flex; gap:10px; }
+.audit-col { flex:1; background:var(--navy2); border-radius:14px; padding:14px; }
+.audit-col-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.audit-input { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:8px 10px; font-size:12px; color:white; font-family:inherit; resize:none; width:100%; outline:none; min-height:100px; }
+.audit-input::placeholder { color:rgba(255,255,255,0.2); font-size:11px; }
+.audit-input:focus { border-color:var(--pink); }
+.audit-result { display:none; background:rgba(219,39,119,0.1); border:1px solid rgba(219,39,119,0.2); border-radius:14px; padding:14px 16px; }
+.audit-result.visible { display:block; }
+
+/* CHECKLIST */
+.check-items { display:flex; flex-direction:column; gap:8px; }
+.check-item { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+.check-item.checked { border-color:var(--green); background:rgba(29,184,126,0.08); }
+.check-box { width:22px; height:22px; border-radius:6px; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; position:relative; transition:all 0.2s; margin-top:1px; }
+.check-item.checked .check-box { background:var(--green); border-color:var(--green); }
+.check-item.checked .check-box::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; font-weight:800; color:white; }
+.check-label { font-size:13px; color:white; font-weight:500; line-height:1.4; }
+.check-sub { font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px; line-height:1.3; }
+.check-score { display:none; border-radius:14px; padding:14px 16px; }
+.check-score.visible { display:block; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#200A14 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(219,39,119,0.15); border:1px solid rgba(219,39,119,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#F9A8D4; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.boundary-box { background:rgba(219,39,119,0.1); border:1px solid rgba(219,39,119,0.2); border-radius:14px; padding:16px; }
+.boundary-title { font-size:14px; font-weight:800; color:#F9A8D4; margin-bottom:8px; }
+.boundary-item { display:flex; gap:8px; align-items:flex-start; margin-bottom:6px; }
+.boundary-dot { width:5px; height:5px; border-radius:50%; background:var(--pink); flex-shrink:0; margin-top:6px; }
+.boundary-text { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">⚡</div>
+      <div class="cover-title">Who drains you.<br>Who recharges you.</div>
+      <div class="cover-sub">Social energy is finite. Most burned-out people are spending theirs on the wrong people.</div>
+      <div class="cover-tag">Module S10 — Social energy management</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">Audit</div><div class="stat-lbl">included</div></div>
+        <div class="stat"><div class="stat-num">Action</div><div class="stat-lbl">plan</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE BIOLOGY -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Social interactions<br>change your cortisol.<br>Measurably.</div>
+      <div class="s-sub">Some people activate your stress response. Others calm it. This is biology, not preference.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--pink);">What happens in your nervous system</div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Secure relationships</strong> activate the ventral vagal system — the social engagement branch of the parasympathetic nervous system. Cortisol drops. Oxytocin rises. You feel calm and safe.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Threatening or unpredictable relationships</strong> activate the sympathetic system. Cortisol rises. Your body treats social threat the same as physical threat — same hormones, same energy cost.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Draining relationships</strong> don't need to be hostile. A person who consistently takes without reciprocating creates a chronic low-grade stress response — even if every interaction seems fine on the surface.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(219,39,119,0.08); border:1px solid rgba(219,39,119,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:13px; line-height:1.6;">You cannot maintain serenity while spending 80% of your social energy on people who deplete it. <strong style="color:white;">This is not selfish. It's physiological.</strong></div>
+      </div>
+    </div>
+
+    <!-- 2: AUDIT -->
+    <div class="slide slide-audit" data-index="2">
+      <div class="s-title">Your social energy audit.</div>
+      <div class="audit-intro">Think of the 5–8 people you interact with most regularly. Split them honestly.</div>
+      <div class="audit-cols">
+        <div class="audit-col" style="border:1px solid rgba(29,184,126,0.25);">
+          <div class="audit-col-title" style="color:var(--green);">Recharges me</div>
+          <textarea class="audit-input" placeholder="Names or initials...&#10;&#10;After time with them, I feel lighter, clearer, more myself."></textarea>
+        </div>
+        <div class="audit-col" style="border:1px solid rgba(240,80,58,0.25);">
+          <div class="audit-col-title" style="color:var(--coral);">Drains me</div>
+          <textarea class="audit-input" placeholder="Names or initials...&#10;&#10;After time with them, I feel tired, anxious, or less like myself."></textarea>
+        </div>
+      </div>
+      <button onclick="showAudit()" style="background:var(--pink);border:none;border-radius:22px;padding:12px 24px;font-size:14px;font-weight:700;color:white;cursor:pointer;align-self:flex-start;">Analyse my map →</button>
+      <div class="audit-result" id="auditResult"></div>
+    </div>
+
+    <!-- 3: BOUNDARIES -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Boundaries aren't walls.<br>They're dosage instructions.</div>
+      <div class="s-sub">You don't have to remove people. You have to manage how much energy you allocate.</div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#0F5132;">Protect the rechargers</div>
+        <div class="tip-text">Schedule regular time with people who restore you — not when you're already depleted. These relationships need investment to stay strong. They're your recovery infrastructure.</div>
+      </div>
+      <div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);">
+        <div class="tip-title" style="color:#991B1B;">Reduce the drainers</div>
+        <div class="tip-text">You don't need to end relationships. Shorter interactions. Less frequent. Less available. "I only have 20 minutes" is a complete sentence. So is "I can't talk right now."</div>
+      </div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);">
+        <div class="tip-title" style="color:#78350F;">Recover after draining interactions</div>
+        <div class="tip-text">Build in a transition ritual — 5-minute walk, breathing exercise, alone time — after interactions with draining people. You're not being dramatic. You're managing a real physiological cost.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💡 <strong style="color:var(--navy);">The hardest part:</strong> draining people are often people you love. Managing energy with them isn't about love — it's about sustainability. You can't give from empty.</div>
+      </div>
+    </div>
+
+    <!-- 4: CHECKLIST + FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Your social protocol</div>
+      <div class="final-title">Your energy is finite.<br>Spend it like it matters.</div>
+      <div class="final-body">The most common pattern in burnout: giving unlimited energy to people who take, while slowly withdrawing from people who restore. By the time you notice, the recharging relationships have faded.</div>
+      <div class="boundary-box">
+        <div class="boundary-title">Three changes. This week.</div>
+        <div class="boundary-item"><div class="boundary-dot"></div><div class="boundary-text"><strong>Schedule one thing</strong> with someone from your recharge list — not to catch up, but specifically because you need restoration.</div></div>
+        <div class="boundary-item"><div class="boundary-dot"></div><div class="boundary-text"><strong>Shorten one interaction</strong> with someone from your drain list — one conversation this week, 20 minutes shorter than usual.</div></div>
+        <div class="boundary-item"><div class="boundary-dot"></div><div class="boundary-text"><strong>Build one transition ritual</strong> — walk, breathe, or sit alone for 5 minutes after the next draining interaction. Notice what it does.</div></div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S11 — Cold, heat and your nervous system.</strong> The physiological tools that reset stress at the cellular level.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-audit';
+  if(idx===3) return 'slide slide-white';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--pink)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+function showAudit(){
+  var r=document.getElementById('auditResult');
+  r.className='audit-result visible';
+  r.innerHTML='<div style="font-size:13px;font-weight:700;color:#F9A8D4;margin-bottom:8px;">Your map is drawn.</div><div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;">Most people find 2–3 clear rechargers and 2–3 clear drainers — and a middle group that depends on context. Start with the extremes: protect one recharger, reduce one drainer. That\'s enough to shift your baseline this week.</div>';
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

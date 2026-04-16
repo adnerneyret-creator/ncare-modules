@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · The worry window</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --slate:#475569; --slate-l:#F1F5F9;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:#94A3B8; }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:#64748B; border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:#94A3B8; letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(148,163,184,0.15); border:1px solid rgba(148,163,184,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:#CBD5E1; font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* WORRY TIMER */
+.slide-worry { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.worry-label { font-size:12px; font-weight:700; color:#94A3B8; letter-spacing:2px; text-transform:uppercase; }
+.worry-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.worry-ring svg { transform:rotate(-90deg); }
+.worry-ring circle { fill:none; stroke-width:8; }
+.worry-ring .bg { stroke:rgba(255,255,255,0.08); }
+.worry-ring .prog { stroke:#64748B; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.worry-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.worry-time { font-size:44px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.worry-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.worry-phase { font-size:12px; color:#94A3B8; margin-top:2px; }
+.worry-msg { font-size:13px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.worry-btn { background:#64748B; border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.worry-btn.pause { background:rgba(255,255,255,0.1); }
+.worry-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); display:none; text-align:center; }
+
+/* WORRY JOURNAL */
+.slide-journal { background:var(--navy); }
+.journal-intro { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; }
+.journal-section { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.journal-label { font-size:11px; font-weight:700; color:#94A3B8; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.journal-input { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px; font-size:13px; color:white; font-family:inherit; resize:none; width:100%; outline:none; min-height:60px; }
+.journal-input::placeholder { color:rgba(255,255,255,0.2); }
+.journal-input:focus { border-color:#64748B; }
+.journal-sep { height:1px; background:rgba(255,255,255,0.06); margin:10px 0; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0F1520 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(148,163,184,0.15); border:1px solid rgba(148,163,184,0.25); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:#CBD5E1; letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.insight-box { background:rgba(148,163,184,0.1); border:1px solid rgba(148,163,184,0.2); border-radius:14px; padding:16px; }
+.insight-title { font-size:14px; font-weight:800; color:#CBD5E1; margin-bottom:8px; }
+.insight-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🪟</div>
+      <div class="cover-title">The worry window.</div>
+      <div class="cover-sub">You can't stop worrying. But you can contain it. 15 minutes a day — that's the entire deal.</div>
+      <div class="cover-tag">Module S09 — Structured worry time</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">15'</div><div class="stat-lbl">timer</div></div>
+        <div class="stat"><div class="stat-num">Journal</div><div class="stat-lbl">method</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Suppressing worry<br>makes it louder.</div>
+      <div class="s-sub">The ironic process theory. Trying not to think about something guarantees you think about it.</div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:var(--coral);">What doesn't work</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>"Stop worrying."</strong> Asking the brain to suppress a thought requires actively thinking about it to check if you're thinking about it. It amplifies the very thing you're trying to avoid.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Distraction.</strong> Scrolling, watching, eating to avoid the feeling. Works for minutes. The worry returns stronger when the distraction ends.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Rumination.</strong> Going over and over the same thought without structure. Keeps the amygdala activated without moving toward resolution.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="card-title" style="color:var(--green);">What works</div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Scheduled worry time.</strong> Clinical research (Borkovec, 1983) shows that postponing worry to a specific, bounded time reduces total daily worry by 35–40%. The brain accepts the delay once it trusts the time is coming.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Writing it down.</strong> Transfers the worry from working memory (which keeps rehearsing it) to external storage. The brain releases its grip on thoughts it can see.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: THE METHOD -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">The three-step<br>worry window.</div>
+      <div class="s-sub">15 minutes. Same time every day. That's the container.</div>
+      <div class="tip-card" style="background:#F1F5F9; border-color:#64748B;">
+        <div class="tip-title" style="color:#1E293B;">Step 1 — Schedule it (pick your time now)</div>
+        <div class="tip-text">Choose a time between 4pm and 7pm — early enough that cortisol drops before sleep, late enough to catch the day's worries. Same time every day. When a worry arrives outside the window: "Not now. 5:30pm."</div>
+      </div>
+      <div class="tip-card" style="background:#F1F5F9; border-color:#64748B;">
+        <div class="tip-title" style="color:#1E293B;">Step 2 — Write everything down (15 minutes only)</div>
+        <div class="tip-text">All worries on paper. No filtering, no editing. Big fears, small irritations, everything. Once written, for each worry: is this in my control? Yes → write one action. No → acknowledge and let it sit.</div>
+      </div>
+      <div class="tip-card" style="background:#F1F5F9; border-color:#64748B;">
+        <div class="tip-title" style="color:#1E293B;">Step 3 — Close the window (hard stop)</div>
+        <div class="tip-text">When the 15 minutes end — stop. Close the notebook. Do something physical immediately (walk, breathe, stretch). The physical transition signals to the brain that the worry session is complete.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">📓 <strong style="color:var(--navy);">Paper is better than phone.</strong> Writing by hand engages different neural pathways than typing — it slows the process down and deepens the transfer from working memory.</div>
+      </div>
+    </div>
+
+    <!-- 3: WORRY TIMER + JOURNAL -->
+    <div class="slide slide-journal" data-index="3">
+      <div class="s-title">Your worry window.</div>
+      <div class="journal-intro">15 minutes. Write everything. Don't edit. Use the timer.</div>
+
+      <div style="display:flex; gap:10px; align-items:center; background:var(--navy2); border-radius:14px; padding:12px 16px;">
+        <div style="font-size:28px; font-weight:900; color:#94A3B8; font-variant-numeric:tabular-nums; min-width:60px;" id="jTimer">15:00</div>
+        <div style="flex:1;">
+          <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:2px;">Worry window timer</div>
+          <div style="font-size:13px; color:rgba(255,255,255,0.7);" id="jStatus">Tap start when ready</div>
+        </div>
+        <button style="background:#64748B;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:white;cursor:pointer;" id="jBtn" onclick="jAction()">Start</button>
+      </div>
+
+      <div class="journal-section">
+        <div class="journal-label">What's on my mind</div>
+        <textarea class="journal-input" rows="3" placeholder="Write every worry. Big, small, rational, irrational. All of it..."></textarea>
+        <div class="journal-sep"></div>
+        <div class="journal-label">What's in my control</div>
+        <textarea class="journal-input" rows="2" placeholder="For each worry above — one action I can take, or 'not in my control'..."></textarea>
+        <div class="journal-sep"></div>
+        <div class="journal-label">One thing I'll do tomorrow</div>
+        <textarea class="journal-input" rows="2" placeholder="The one concrete action that addresses the most important controllable worry..."></textarea>
+      </div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Worry contained</div>
+      <div class="final-title">The window closes.<br>The rest of your day<br>is worry-free.</div>
+      <div class="final-body">With practice, your brain learns to wait. Worries that arise outside the window get a new response: "I'll deal with that at 5:30." And remarkably — most of them feel smaller when 5:30 arrives.</div>
+      <div class="insight-box">
+        <div class="insight-title">What your AI tracks</div>
+        <div class="insight-text">Your daily PSS-10 check-in captures whether the worry window is working. If stress scores don't drop after 2 weeks of consistent use — your AI will suggest an adapted approach. The method adjusts to you.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S10 — Who drains you, who recharges you.</strong> Social energy management — the relationship audit you've been avoiding.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-white';
+  if(idx===3) return 'slide slide-journal';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'#64748B';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+// JOURNAL TIMER
+var jRun=false,jDone=false,jRemain=900,jTotal=900,jInt=null;
+function jFmt(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+function jAction(){
+  if(jDone) return;
+  if(!jRun){
+    jRun=true;
+    document.getElementById('jBtn').textContent='Pause';
+    document.getElementById('jBtn').style.background='rgba(255,255,255,0.1)';
+    document.getElementById('jStatus').textContent='Write. Don\'t stop. Don\'t edit.';
+    jInt=setInterval(function(){
+      jRemain--;
+      document.getElementById('jTimer').textContent=jFmt(jRemain);
+      if(jRemain===600) document.getElementById('jStatus').textContent='10 minutes left. Keep writing.';
+      if(jRemain===300) document.getElementById('jStatus').textContent='5 minutes. Move to the actions column.';
+      if(jRemain===60)  document.getElementById('jStatus').textContent='1 minute. Write your one action for tomorrow.';
+      if(jRemain<=0){
+        clearInterval(jInt);jDone=true;jRun=false;
+        document.getElementById('jTimer').textContent='✓';
+        document.getElementById('jStatus').textContent='Window closed. Close your notes now.';
+        document.getElementById('jBtn').style.display='none';
+      }
+    },1000);
+  } else {
+    jRun=false;clearInterval(jInt);
+    document.getElementById('jBtn').textContent='Resume';
+    document.getElementById('jBtn').style.background='#64748B';
+    document.getElementById('jStatus').textContent='Paused.';
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

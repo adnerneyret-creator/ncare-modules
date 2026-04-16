@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · The 10-minute morning anchor</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0C4A6E;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --amber:#F5A623; --amber-l:#FEF6E4;
+  --gold:#C9A84C; --gold-l:#F5EDD6;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--gold); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--gold); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--gold); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--gold); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* ROUTINE BUILDER */
+.slide-routine { background:var(--navy); }
+.routine-intro { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; }
+.routine-slots { display:flex; flex-direction:column; gap:8px; }
+.routine-slot { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+.routine-slot.selected { border-color:var(--gold); background:rgba(201,168,76,0.08); }
+.slot-time { font-size:12px; font-weight:700; color:var(--gold); min-width:32px; }
+.slot-info { flex:1; }
+.slot-name { font-size:13px; font-weight:600; color:white; margin-bottom:2px; }
+.slot-desc { font-size:11px; color:rgba(255,255,255,0.4); line-height:1.3; }
+.slot-check { width:20px; height:20px; border-radius:6px; border:1.5px solid rgba(255,255,255,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:transparent; transition:all 0.2s; }
+.routine-slot.selected .slot-check { background:var(--gold); border-color:var(--gold); color:var(--navy); }
+.routine-result { display:none; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); border-radius:14px; padding:14px 16px; }
+.routine-result.visible { display:block; }
+
+/* TIMER SLIDE */
+.slide-timer { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.timer-label { font-size:12px; font-weight:700; color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
+.timer-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.timer-ring svg { transform:rotate(-90deg); }
+.timer-ring circle { fill:none; stroke-width:8; }
+.timer-ring .bg { stroke:rgba(255,255,255,0.08); }
+.timer-ring .progress { stroke:var(--gold); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.timer-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.timer-time { font-size:44px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.timer-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.timer-phase { font-size:12px; color:var(--gold); margin-top:2px; }
+.timer-msg { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.timer-btn { background:var(--gold); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:var(--navy); cursor:pointer; }
+.timer-btn.pause { background:rgba(255,255,255,0.1); color:white; }
+.timer-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); font-weight:600; display:none; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C1500 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--gold); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.rule-box { background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.2); border-radius:14px; padding:16px; }
+.rule-title { font-size:14px; font-weight:800; color:var(--gold); margin-bottom:8px; }
+.rule-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🌅</div>
+      <div class="cover-title">The 10-minute<br>morning anchor.</div>
+      <div class="cover-sub">The first 10 minutes of your day set your cortisol rhythm for the next 16 hours.</div>
+      <div class="cover-tag">Module S04 — Morning routine</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">10'</div><div class="stat-lbl">timer</div></div>
+        <div class="stat"><div class="stat-num">Build</div><div class="stat-lbl">your routine</div></div>
+      </div>
+    </div>
+
+    <!-- 1: WHY MORNING -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Your morning is the<br>most leveraged moment.</div>
+      <div class="s-sub">What you do in the first 10 minutes changes everything that follows.</div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:var(--coral);">What most people do</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Check phone immediately.</strong> News, emails, social media. The brain receives stress signals before it's even fully awake. Cortisol spikes unnecessarily.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Rush mode activated.</strong> No buffer, no transition. The nervous system enters threat mode from the first seconds of the day — and never fully exits.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2);">
+        <div class="card-title" style="color:var(--gold);">What 10 intentional minutes do</div>
+        <div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Cortisol Awakening Response (CAR):</strong> cortisol naturally peaks 20–30 min after waking. What you do in this window determines how that peak lands — productively or anxiously.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Natural light + movement + breathing</strong> in the first 10 minutes sets your circadian rhythm, blunts the anxiety edge of the cortisol peak, and lowers baseline stress all day.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.03);">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Source: Wust S. et al., Psychoneuroendocrinology (2000) · Huberman A. et al., Stanford Neuroscience (2021)</div>
+      </div>
+    </div>
+
+    <!-- 2: BUILD YOUR ROUTINE -->
+    <div class="slide slide-routine" data-index="2">
+      <div class="s-title">Build your anchor.</div>
+      <div class="routine-intro">Pick 3 habits. That's your 10-minute morning. No more, no less.</div>
+      <div class="routine-slots" id="routineSlots">
+        <div class="routine-slot" onclick="toggleSlot(0)" id="rs0">
+          <div class="slot-time">2 min</div>
+          <div class="slot-info">
+            <div class="slot-name">No phone for 10 minutes after waking</div>
+            <div class="slot-desc">The single highest-leverage change. Your brain needs a stress-free window to complete its sleep cycle properly.</div>
+          </div>
+          <div class="slot-check" id="sc0">✓</div>
+        </div>
+        <div class="routine-slot" onclick="toggleSlot(1)" id="rs1">
+          <div class="slot-time">3 min</div>
+          <div class="slot-info">
+            <div class="slot-name">Natural light exposure</div>
+            <div class="slot-desc">Open a window or step outside. 3 minutes of natural light synchronises your circadian clock and improves sleep quality that same night.</div>
+          </div>
+          <div class="slot-check" id="sc1">✓</div>
+        </div>
+        <div class="routine-slot" onclick="toggleSlot(2)" id="rs2">
+          <div class="slot-time">3 min</div>
+          <div class="slot-info">
+            <div class="slot-name">Cardiac coherence breathing</div>
+            <div class="slot-desc">5-5 breathing before the day starts. Blunts the anxiety edge of the morning cortisol peak.</div>
+          </div>
+          <div class="slot-check" id="sc2">✓</div>
+        </div>
+        <div class="routine-slot" onclick="toggleSlot(3)" id="rs3">
+          <div class="slot-time">2 min</div>
+          <div class="slot-info">
+            <div class="slot-name">Drink 500ml water immediately</div>
+            <div class="slot-desc">You wake up mildly dehydrated. Cortisol rises with dehydration. Water first, coffee second — even 2 minutes delay makes a measurable difference.</div>
+          </div>
+          <div class="slot-check" id="sc3">✓</div>
+        </div>
+        <div class="routine-slot" onclick="toggleSlot(4)" id="rs4">
+          <div class="slot-time">5 min</div>
+          <div class="slot-info">
+            <div class="slot-name">Gentle movement — stretching or walking</div>
+            <div class="slot-desc">Activates the lymphatic system and uses up excess cortisol constructively. Doesn't need to be intense — intentional is enough.</div>
+          </div>
+          <div class="slot-check" id="sc4">✓</div>
+        </div>
+        <div class="routine-slot" onclick="toggleSlot(5)" id="rs5">
+          <div class="slot-time">2 min</div>
+          <div class="slot-info">
+            <div class="slot-name">Name one intention for the day</div>
+            <div class="slot-desc">Not a to-do list. One sentence: what matters most today. Prefrontal cortex activation before the amygdala takes over.</div>
+          </div>
+          <div class="slot-check" id="sc5">✓</div>
+        </div>
+      </div>
+      <button onclick="showRoutine()" style="background:var(--gold);border:none;border-radius:22px;padding:12px 24px;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;align-self:flex-start;">Build my anchor →</button>
+      <div class="routine-result" id="routineResult"></div>
+    </div>
+
+    <!-- 3: TIMER -->
+    <div class="slide slide-timer" data-index="3">
+      <div class="timer-label">Morning anchor · 10 min</div>
+      <div class="timer-ring">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle class="bg" cx="100" cy="100" r="88"/>
+          <circle class="progress" id="timerCircle" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="553"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timerDisplay">10:00</div>
+          <div class="timer-unit">minutes</div>
+          <div class="timer-phase" id="timerPhase">No phone · Light · Breathe</div>
+        </div>
+      </div>
+      <div class="timer-msg" id="timerMsg">Start your morning anchor. Tap when ready.</div>
+      <button class="timer-btn" id="timerBtn" onclick="timerAction()">Start anchor →</button>
+      <div class="timer-done" id="timerDone">Morning anchor complete. Your cortisol rhythm is set.</div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Daily anchor</div>
+      <div class="final-title">10 minutes.<br>Every morning.<br>Before anything else.</div>
+      <div class="final-body">The morning anchor doesn't require motivation. It requires a decision made the night before — phone face down, glass of water on the nightstand, alarm 10 minutes earlier.</div>
+      <div class="rule-box">
+        <div class="rule-title">The one rule that makes it work</div>
+        <div class="rule-text">The anchor must happen before your first screen exposure. Once you check your phone, the cortisol window is already determined. The anchor only works in the first 10 minutes — before the day's inputs arrive.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S05 — Move to recover, not to perform.</strong> Exercise as cortisol management — not as punishment.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0, total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[], bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d); dots.push(d);
+}
+function updateDots(){ dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); }); }
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-routine';
+  if(idx===3) return 'slide slide-timer';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next; slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--gold)';
+  nb.style.color=current===total-1?'white':'var(--navy)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+// ROUTINE BUILDER
+var selected=[];
+function toggleSlot(idx){
+  var el=document.getElementById('rs'+idx);
+  var pos=selected.indexOf(idx);
+  if(pos>=0){ selected.splice(pos,1); el.classList.remove('selected'); }
+  else if(selected.length<3){ selected.push(idx); el.classList.add('selected'); }
+}
+var slotNames=['No phone for 10 minutes','Natural light exposure','Cardiac coherence breathing','Drink 500ml water','Gentle movement','Name one intention'];
+function showRoutine(){
+  var r=document.getElementById('routineResult');
+  if(selected.length===0){ r.innerHTML='<div style="font-size:13px;color:rgba(255,255,255,0.6);">Pick at least 1 habit to build your anchor.</div>'; r.className='routine-result visible'; return; }
+  var names=selected.map(function(i){ return '→ '+slotNames[i]; }).join('<br>');
+  r.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;">Your morning anchor</div><div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.8;">'+names+'</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;">Every morning. Before your phone. That\'s it.</div>';
+  r.className='routine-result visible';
+}
+
+// TIMER 10 MIN
+var tRunning=false, tDone=false, tRemain=600, tTotal=600, tInterval=null;
+var phases=['No phone · Light · Breathe','Keep going. You\'re setting your day.','Almost there. Stay with it.','One final minute.'];
+function tFmt(s){ return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+function timerAction(){
+  if(tDone) return;
+  if(!tRunning){
+    tRunning=true;
+    document.getElementById('timerBtn').textContent='Pause';
+    document.getElementById('timerBtn').className='timer-btn pause';
+    document.getElementById('timerMsg').textContent='Breathe. No phone. Let the morning come to you.';
+    tInterval=setInterval(function(){
+      tRemain--;
+      document.getElementById('timerDisplay').textContent=tFmt(tRemain);
+      var prog=(tTotal-tRemain)/tTotal;
+      document.getElementById('timerCircle').style.strokeDashoffset=553*(1-prog);
+      if(tRemain===480) document.getElementById('timerPhase').textContent=phases[1];
+      if(tRemain===300) document.getElementById('timerPhase').textContent=phases[2];
+      if(tRemain===60)  document.getElementById('timerPhase').textContent=phases[3];
+      if(tRemain<=0){
+        clearInterval(tInterval); tDone=true; tRunning=false;
+        document.getElementById('timerDisplay').textContent='✓';
+        document.getElementById('timerPhase').textContent='';
+        document.getElementById('timerMsg').textContent='Now you can check your phone.';
+        document.getElementById('timerBtn').style.display='none';
+        document.getElementById('timerDone').style.display='block';
+        document.getElementById('timerCircle').style.stroke='var(--green)';
+      }
+    },1000);
+  } else {
+    tRunning=false; clearInterval(tInterval);
+    document.getElementById('timerBtn').textContent='Resume →';
+    document.getElementById('timerBtn').className='timer-btn';
+    document.getElementById('timerMsg').textContent='Paused. Stay away from your phone.';
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

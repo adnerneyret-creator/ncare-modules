@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · Your stress is not your fault</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0C4A6E;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --purple:#7C3AED; --purple-l:#F5F3FF;
+  --gold:#C9A84C; --gold-l:#F5EDD6;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--teal); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--teal); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--teal); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* REFRAME */
+.reframe-pair { display:flex; flex-direction:column; gap:10px; }
+.reframe-old { background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2); border-radius:14px; padding:14px 16px; }
+.reframe-new { background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.2); border-radius:14px; padding:14px 16px; }
+.reframe-tag { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.reframe-text { font-size:14px; color:rgba(255,255,255,0.85); line-height:1.5; font-style:italic; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* IDENTITY */
+.slide-identity { background:var(--navy); justify-content:center; gap:14px; }
+.identity-q { font-size:18px; font-weight:800; color:white; line-height:1.4; }
+.identity-sub { font-size:13px; color:rgba(255,255,255,0.4); }
+.identity-opts { display:flex; flex-direction:column; gap:10px; }
+.identity-opt { background:var(--navy2); border:2px solid transparent; border-radius:14px; padding:16px; cursor:pointer; transition:all 0.2s; }
+.identity-opt.picked { border-color:var(--teal); background:rgba(8,145,178,0.1); }
+.identity-opt-label { font-size:14px; font-weight:600; color:white; line-height:1.4; }
+.identity-result { display:none; background:rgba(8,145,178,0.1); border:1px solid rgba(8,145,178,0.25); border-radius:14px; padding:14px 16px; }
+.identity-result.visible { display:block; }
+
+/* COMMITMENT */
+.commitment-box { background:var(--navy2); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.commitment-label { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:1px; text-transform:uppercase; }
+.commitment-input { background:rgba(255,255,255,0.07); border:1px solid rgba(8,145,178,0.3); border-radius:12px; padding:14px; font-size:14px; color:white; font-family:inherit; resize:none; min-height:80px; outline:none; }
+.commitment-input::placeholder { color:rgba(255,255,255,0.25); }
+.commitment-input:focus { border-color:var(--teal); }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0C2A3A 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--teal); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:24px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.final-items { display:flex; flex-direction:column; gap:8px; }
+.final-item { background:rgba(8,145,178,0.1); border:1px solid rgba(8,145,178,0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.final-item-icon { font-size:20px; }
+.final-item-text { font-size:13px; color:white; line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🧠</div>
+      <div class="cover-title">Your stress is not<br>your fault.</div>
+      <div class="cover-sub">Understanding why your brain does this changes everything.</div>
+      <div class="cover-tag">Module S01 — Understanding stress</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Science</div><div class="stat-lbl">backed</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE BIOLOGY -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Your brain is doing<br>exactly what it was built to do.</div>
+      <div class="s-sub">The problem isn't you. It's the mismatch.</div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:rgba(240,80,58,0.9);">What your stress system was designed for</div>
+        <div class="item"><div class="item-dot" style="background:#F0503A;"></div><div class="item-text">A predator appears. <strong>Cortisol spikes.</strong> Heart rate rises. Muscles activate. You run or fight. 30 minutes later — it's over. Cortisol drops. Body recovers.</div></div>
+        <div class="item"><div class="item-dot" style="background:#F5A623;"></div><div class="item-text">This system is <strong>perfect</strong> — for short, intense, physical threats that end.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.2);">
+        <div class="card-title" style="color:var(--teal);">What your stress system faces today</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text">An email that doesn't end. A deadline that moves. A relationship that's complicated. A future that's uncertain. <strong>The threat never stops.</strong> So cortisol never fully drops.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text">Your brain can't tell the difference between a tiger and a tax return. <strong>Same system. Wrong era.</strong></div></div>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.6); font-size:13px; line-height:1.6;">Chronic stress is not weakness. It's an <strong style="color:white;">evolutionary mismatch</strong> — a survival system running in a world it wasn't designed for.</div>
+      </div>
+    </div>
+
+    <!-- 2: WHAT CHRONIC STRESS DOES -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">What happens when<br>cortisol never drops.</div>
+      <div class="s-sub">Six things your body is doing right now — without telling you.</div>
+      <div style="display:flex; gap:10px;">
+        <div style="background:rgba(240,80,58,0.1); border-radius:14px; padding:14px; flex:1;">
+          <div style="font-size:24px; font-weight:900; color:#F0503A; line-height:1;">↑</div>
+          <div style="font-size:12px; font-weight:700; color:#F0503A; margin-top:4px;">Inflammation</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4;">Chronic cortisol activates inflammatory pathways — joints, gut, brain.</div>
+        </div>
+        <div style="background:rgba(245,166,35,0.1); border-radius:14px; padding:14px; flex:1;">
+          <div style="font-size:24px; font-weight:900; color:var(--amber); line-height:1;">↑</div>
+          <div style="font-size:12px; font-weight:700; color:var(--amber); margin-top:4px;">Blood sugar</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4;">Cortisol raises glucose. Insulin rises. Fat stores around the abdomen.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div style="background:rgba(124,58,237,0.1); border-radius:14px; padding:14px; flex:1;">
+          <div style="font-size:24px; font-weight:900; color:#A5B4FC; line-height:1;">↓</div>
+          <div style="font-size:12px; font-weight:700; color:#A5B4FC; margin-top:4px;">Sleep quality</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4;">High evening cortisol blocks melatonin. Light sleep. Early waking.</div>
+        </div>
+        <div style="background:rgba(29,184,126,0.1); border-radius:14px; padding:14px; flex:1;">
+          <div style="font-size:24px; font-weight:900; color:var(--green); line-height:1;">↓</div>
+          <div style="font-size:12px; font-weight:700; color:var(--green); margin-top:4px;">Immune function</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4;">Cortisol suppresses the immune system — more infections, slower healing.</div>
+        </div>
+      </div>
+      <div class="card-dark" style="background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.15);">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;">These aren't symptoms of weakness. They're <strong style="color:white;">predictable biological consequences</strong> of a system running too long without recovery. Every single one is reversible.</div>
+      </div>
+    </div>
+
+    <!-- 3: THE REFRAME -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Reframing what<br>you've been told.</div>
+      <div class="s-sub">Four things chronic stress is not.</div>
+      <div class="reframe-pair">
+        <div class="reframe-old"><div class="reframe-tag" style="color:#DC2626;">What you've been told</div><div class="reframe-text">"You're too sensitive. Learn to handle pressure."</div></div>
+        <div class="reframe-new"><div class="reframe-tag" style="color:#0891B2;">What's actually true</div><div class="reframe-text">Your nervous system is responding to real signals. Sensitivity is not a flaw — it's a calibration problem.</div></div>
+      </div>
+      <div class="reframe-pair">
+        <div class="reframe-old"><div class="reframe-tag" style="color:#DC2626;">What you've been told</div><div class="reframe-text">"You just need to relax. Stop overthinking."</div></div>
+        <div class="reframe-new"><div class="reframe-tag" style="color:#0891B2;">What's actually true</div><div class="reframe-text">Overthinking is a survival mechanism — your brain scanning for threats. You can't willpower your way out. You need to change the input signals.</div></div>
+      </div>
+      <div class="reframe-pair">
+        <div class="reframe-old"><div class="reframe-tag" style="color:#DC2626;">What you've been told</div><div class="reframe-text">"Stress makes you stronger. Push through it."</div></div>
+        <div class="reframe-new"><div class="reframe-tag" style="color:#0891B2;">What's actually true</div><div class="reframe-text">Acute stress builds resilience. Chronic stress erodes it. The difference is recovery. Without recovery, pushing through makes things worse.</div></div>
+      </div>
+    </div>
+
+    <!-- 4: IDENTITY -->
+    <div class="slide slide-identity" data-index="4">
+      <div class="identity-q">Which feels most true<br>about your stress right now?</div>
+      <div class="identity-sub">No wrong answer. This shapes how your AI personalises your programme.</div>
+      <div class="identity-opts">
+        <div class="identity-opt" id="io0" onclick="pickIdentity(0)">
+          <div class="identity-opt-label">⚡ "I'm always on. I can't switch off — even when I want to."</div>
+        </div>
+        <div class="identity-opt" id="io1" onclick="pickIdentity(1)">
+          <div class="identity-opt-label">😶 "I feel flat and exhausted more than anxious. I've stopped feeling much."</div>
+        </div>
+        <div class="identity-opt" id="io2" onclick="pickIdentity(2)">
+          <div class="identity-opt-label">🌀 "I function fine on the outside. Inside, it's a different story."</div>
+        </div>
+      </div>
+      <div class="identity-result" id="identityResult"></div>
+    </div>
+
+    <!-- 5: COMMITMENT -->
+    <div class="slide slide-dark" data-index="5">
+      <div class="s-title">One thing you<br>commit to changing.</div>
+      <div class="s-sub">Not a list. Not a resolution. One sentence.</div>
+      <div class="card-dark" style="background:rgba(8,145,178,0.08); border:1px solid rgba(8,145,178,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:13px; line-height:1.7;">Research shows that naming one specific change — not a vague intention — increases follow-through by 42%. Not because of willpower. Because the brain treats a written commitment differently than a thought.</div>
+      </div>
+      <div class="commitment-box">
+        <div class="commitment-label">In the next 28 days, I will stop pretending that</div>
+        <textarea class="commitment-input" placeholder="e.g. ...my stress doesn't exist. I will check in daily and take the 5 minutes I keep skipping.&#10;&#10;Or: ...I can keep going without recovery. I will protect one hour per day for myself."></textarea>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Private. Stays on your device. This is a signal to yourself — not a report to anyone.</div>
+      </div>
+    </div>
+
+    <!-- 6: FINAL -->
+    <div class="slide slide-final" data-index="6">
+      <div class="final-badge">SÉRÉNITÉ · Day 1</div>
+      <div class="final-title">You're not broken.<br>You're overloaded.<br>That's fixable.</div>
+      <div class="final-body">Over the next 3 months, Sérénité will deliver 12 modules — each targeting a specific moment where chronic stress takes hold. You'll understand it before it controls you.</div>
+      <div class="final-items">
+        <div class="final-item">
+          <div class="final-item-icon">🫁</div>
+          <div class="final-item-text"><strong>Next:</strong> Module S02 — The breath that changes everything. 5 minutes that reset your nervous system.</div>
+        </div>
+        <div class="final-item">
+          <div class="final-item-icon">📲</div>
+          <div class="final-item-text"><strong>Daily check-in:</strong> 60 seconds. Energy, mood, stress. Your AI reads 30 days of data to give you relevant advice.</div>
+        </div>
+        <div class="final-item">
+          <div class="final-item-icon">🎯</div>
+          <div class="final-item-text"><strong>One goal:</strong> by Month 3, you'll have the tools to manage your stress — without a therapist, a supplement, or a diagnosis.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 7</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0, total=7;
+var slides=document.querySelectorAll('.slide');
+var dots=[];
+var bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d); dots.push(d);
+}
+function updateDots(){ dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); }); }
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===3) return 'slide slide-white';
+  if(idx===4) return 'slide slide-identity';
+  if(idx===6) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next; slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--teal)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+var responses=[
+  {title:'Always on.', text:'Your nervous system is stuck in sympathetic overdrive — the gas pedal is pressed with no brake. Module S02 will give you the biological brake. It works in 5 minutes. You\'ll feel it immediately.'},
+  {title:'Exhausted, not anxious.', text:'What you\'re describing is adrenal fatigue — your stress system has been running so long it\'s starting to burn out. Recovery comes before performance. We start there.'},
+  {title:'Functioning on the outside.', text:'High-functioning stress is the hardest to treat because you\'ve learned to hide the signals — even from yourself. The check-ins in this programme exist to make the invisible visible.'}
+];
+function pickIdentity(idx){
+  for(var i=0;i<3;i++) document.getElementById('io'+i).className='identity-opt';
+  document.getElementById('io'+idx).className='identity-opt picked';
+  var r=responses[idx];
+  var el=document.getElementById('identityResult');
+  el.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:6px;">'+r.title+'</div><div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.5;">'+r.text+'</div>';
+  el.className='identity-result visible';
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

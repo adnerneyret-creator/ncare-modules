@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · Cold, heat and your nervous system</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --orange:#EA580C; --orange-l:#FFF7ED;
+  --ice:#BAE6FD; --ice-d:#0369A1;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--ice-d); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--ice-d); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--ice-d); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(3,105,161,0.2); border:1px solid rgba(3,105,161,0.4); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--ice); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* CONTRAST TIMER */
+.slide-contrast { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:12px; }
+.contrast-label { font-size:11px; font-weight:700; color:var(--ice-d); letter-spacing:2px; text-transform:uppercase; }
+.contrast-display { width:220px; height:220px; border-radius:50%; border:3px solid rgba(3,105,161,0.3); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px; margin:0 auto; transition:background 3s ease, border-color 3s ease; background:rgba(3,105,161,0.05); }
+.contrast-display.cold { background:rgba(3,105,161,0.2); border-color:rgba(3,105,161,0.6); }
+.contrast-display.hot { background:rgba(234,88,12,0.15); border-color:rgba(234,88,12,0.5); }
+.contrast-phase { font-size:14px; font-weight:700; color:white; letter-spacing:1px; }
+.contrast-time { font-size:52px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.contrast-unit { font-size:12px; color:rgba(255,255,255,0.4); }
+.contrast-round { font-size:12px; color:rgba(255,255,255,0.4); }
+.contrast-msg { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.5; max-width:260px; }
+.contrast-btn { background:var(--ice-d); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.contrast-btn.pause { background:rgba(255,255,255,0.1); }
+.contrast-progress { display:flex; gap:8px; justify-content:center; }
+.contrast-dot { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.15); transition:background 0.3s; }
+.contrast-dot.done { background:var(--green); }
+.contrast-dot.active-c { background:var(--ice-d); }
+.contrast-dot.active-h { background:var(--orange); }
+.contrast-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); display:none; text-align:center; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#041A2A 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(3,105,161,0.2); border:1px solid rgba(3,105,161,0.35); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--ice); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.combo-box { background:rgba(3,105,161,0.1); border:1px solid rgba(3,105,161,0.2); border-radius:14px; padding:16px; }
+.combo-title { font-size:14px; font-weight:800; color:var(--ice); margin-bottom:10px; }
+.combo-item { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+.combo-dot { width:5px; height:5px; border-radius:50%; background:var(--ice-d); flex-shrink:0; margin-top:6px; }
+.combo-text { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🌡️</div>
+      <div class="cover-title">Cold, heat and<br>your nervous system.</div>
+      <div class="cover-sub">Temperature is one of the most direct interventions on the HPA axis. And you already have the tools.</div>
+      <div class="cover-tag">Module S11 — Thermal regulation</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">Contrast</div><div class="stat-lbl">timer</div></div>
+        <div class="stat"><div class="stat-num">Protocol</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Temperature talks<br>directly to your cortisol.</div>
+      <div class="s-sub">Two pathways. Both work. Both accessible in your bathroom.</div>
+      <div style="display:flex; gap:10px;">
+        <div style="background:rgba(3,105,161,0.15);border-radius:14px;padding:14px;flex:1;text-align:center;">
+          <div style="font-size:28px;margin-bottom:6px;">🧊</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ice);margin-bottom:6px;">Cold</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.4;">Norepinephrine +300%. Brown fat activated. Vagus nerve stimulated. HPA axis recalibrated over time.</div>
+        </div>
+        <div style="background:rgba(234,88,12,0.12);border-radius:14px;padding:14px;flex:1;text-align:center;">
+          <div style="font-size:28px;margin-bottom:6px;">🔥</div>
+          <div style="font-size:13px;font-weight:700;color:#FED7AA;margin-bottom:6px;">Heat</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.4;">Heat shock proteins. Growth hormone surge. Cortisol drops after session. BDNF rises — mood improves.</div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--ice-d);">Why contrast works best for stress</div>
+        <div class="item"><div class="item-dot" style="background:var(--ice-d);"></div><div class="item-text"><strong>Hot then cold</strong> creates a vascular pump — vasodilation followed by vasoconstriction. This mechanical action drains inflammatory markers and flushes cortisol metabolites from tissue.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--orange);"></div><div class="item-text"><strong>Cold then hot</strong> ends in relaxation. Better for sleep. The warm finish activates the parasympathetic system — body temperature drops afterward, signalling sleep onset.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Consistency matters more than intensity.</strong> 3× per week of 2-minute cold + 5-minute warm has more long-term effect than one extreme session per week.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: PROTOCOLS -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">Your thermal toolkit.<br>Three protocols.</div>
+      <div class="s-sub">From simplest to most complete. Start wherever you are.</div>
+      <div class="tip-card" style="background:#EFF9FF; border-color:var(--ice-d);">
+        <div class="tip-title" style="color:var(--ice-d);">Level 1 — Cold finish (daily, 30 seconds)</div>
+        <div class="tip-text">Warm shower as normal. Last 30 seconds: cold. Step out without rewarming. You already have this from Module S07 of Maintain. Same protocol — new context: stress management, not just metabolism.</div>
+      </div>
+      <div class="tip-card" style="background:#FFF7ED; border-color:var(--orange);">
+        <div class="tip-title" style="color:var(--orange);">Level 2 — Contrast shower (3× week, 8 minutes)</div>
+        <div class="tip-text">2 min hot → 30 sec cold → 2 min hot → 30 sec cold → 2 min hot → 1 min cold. The alternation is the mechanism. Timer in the next slide guides you through it automatically.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#0F5132;">Level 3 — Heat + cold (1–2× week, 30 minutes)</div>
+        <div class="tip-text">20 min sauna or hot bath (40°C) followed by 2–3 min cold shower. The sequence: cortisol drops during heat, norepinephrine spikes during cold, mood elevation lasts 4–6 hours. Best for high-stress days.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">⚠️ <strong style="color:var(--navy);">Start at Level 1.</strong> Cold tolerance builds over 1–2 weeks. Don't force Level 3 immediately. The benefit is from consistency, not from suffering.</div>
+      </div>
+    </div>
+
+    <!-- 3: CONTRAST TIMER -->
+    <div class="slide slide-contrast" data-index="3">
+      <div class="contrast-label">Contrast shower · 8 min</div>
+      <div class="contrast-display" id="contrastCircle">
+        <div class="contrast-phase" id="contrastPhase">Ready</div>
+        <div class="contrast-time" id="contrastTime">2:00</div>
+        <div class="contrast-unit" id="contrastUnit">minutes</div>
+      </div>
+      <div class="contrast-progress" id="contrastProg"></div>
+      <div class="contrast-round" id="contrastRound">3 rounds · Hot → Cold</div>
+      <div class="contrast-msg" id="contrastMsg">Step in. Start warm. Tap when ready.</div>
+      <button class="contrast-btn" id="contrastBtn" onclick="contrastAction()">Start contrast →</button>
+      <div class="contrast-done" id="contrastDone">Contrast complete. Your nervous system is reset.</div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Thermal reset</div>
+      <div class="final-title">Heat and cold<br>together build<br>stress resilience.</div>
+      <div class="final-body">Thermal regulation is the most underused stress intervention. It requires no thinking, no motivation, no appointments. Just temperature — applied consistently.</div>
+      <div class="combo-box">
+        <div class="combo-title">The full Sérénité thermal protocol</div>
+        <div class="combo-item"><div class="combo-dot"></div><div class="combo-text"><strong>Morning:</strong> Cold finish after your shower (S04 morning anchor). 30 seconds. Sets HPA axis for the day.</div></div>
+        <div class="combo-item"><div class="combo-dot"></div><div class="combo-text"><strong>3× weekly:</strong> Contrast shower using the timer. 8 minutes. Best mid-morning or after movement.</div></div>
+        <div class="combo-item"><div class="combo-dot"></div><div class="combo-text"><strong>Weekly:</strong> Sauna or hot bath + cold finish. 30 minutes. Your deepest recovery session of the week.</div></div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Final module → <strong style="color:white;">S12 — You are your own anchor now.</strong> Your 3-month review, your resilience plan, your exit from the programme.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-white';
+  if(idx===3) return 'slide slide-contrast';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--ice-d)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+// CONTRAST TIMER
+// Sequence: hot 2min, cold 30s, hot 2min, cold 30s, hot 2min, cold 60s
+var sequence=[
+  {phase:'HOT',dur:120,cls:'hot',msg:'Warm water. Breathe deeply. Let the heat work.'},
+  {phase:'COLD',dur:30,cls:'cold',msg:'Switch to cold. Breathe. 30 seconds.'},
+  {phase:'HOT',dur:120,cls:'hot',msg:'Back to warm. Recovery phase.'},
+  {phase:'COLD',dur:30,cls:'cold',msg:'Cold again. You\'re getting better at this.'},
+  {phase:'HOT',dur:120,cls:'hot',msg:'Final warm round. Almost there.'},
+  {phase:'COLD',dur:60,cls:'cold',msg:'Last cold. One full minute. Finish strong.'}
+];
+var cRun=false,cDone=false,cStep=0,cRemain=0,cInt=null;
+
+function buildProg(){
+  var p=document.getElementById('contrastProg');
+  p.innerHTML='';
+  for(var i=0;i<sequence.length;i++){
+    var d=document.createElement('div');
+    d.className='contrast-dot'+(i===0?' active-h':'');
+    d.id='cd'+i; p.appendChild(d);
+  }
+}
+buildProg();
+
+function tFmt(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+
+function contrastAction(){
+  if(cDone) return;
+  if(!cRun){
+    cRun=true;
+    if(cRemain===0) startStep(0);
+    else resumeStep();
+    document.getElementById('contrastBtn').textContent='Pause';
+    document.getElementById('contrastBtn').className='contrast-btn pause';
+  } else {
+    cRun=false; clearInterval(cInt);
+    document.getElementById('contrastBtn').textContent='Resume →';
+    document.getElementById('contrastBtn').className='contrast-btn';
+    document.getElementById('contrastMsg').textContent='Paused. Stay in the shower.';
+  }
+}
+
+function startStep(idx){
+  cStep=idx;
+  var s=sequence[idx];
+  cRemain=s.dur;
+  document.getElementById('contrastPhase').textContent=s.phase;
+  document.getElementById('contrastTime').textContent=tFmt(cRemain);
+  document.getElementById('contrastUnit').textContent='minutes';
+  document.getElementById('contrastMsg').textContent=s.msg;
+  document.getElementById('contrastCircle').className='contrast-display '+s.cls;
+  document.getElementById('contrastRound').textContent='Step '+(idx+1)+' of '+sequence.length;
+  for(var i=0;i<sequence.length;i++){
+    var dot=document.getElementById('cd'+i);
+    dot.className='contrast-dot'+(i<idx?' done':i===idx?(' active-'+(sequence[i].cls==='cold'?'c':'h')):'');
+  }
+  runCount();
+}
+
+function resumeStep(){ runCount(); }
+
+function runCount(){
+  clearInterval(cInt);
+  cInt=setInterval(function(){
+    if(!cRun) return;
+    cRemain--;
+    document.getElementById('contrastTime').textContent=tFmt(cRemain);
+    if(cRemain<=0){
+      clearInterval(cInt);
+      var next=cStep+1;
+      if(next<sequence.length){ startStep(next); }
+      else { finishContrast(); }
+    }
+  },1000);
+}
+
+function finishContrast(){
+  cDone=true; cRun=false;
+  document.getElementById('contrastCircle').className='contrast-display';
+  document.getElementById('contrastCircle').style.background='rgba(29,184,126,0.15)';
+  document.getElementById('contrastCircle').style.borderColor='rgba(29,184,126,0.4)';
+  document.getElementById('contrastPhase').textContent='Done';
+  document.getElementById('contrastTime').textContent='✓';
+  document.getElementById('contrastUnit').textContent='';
+  document.getElementById('contrastMsg').textContent='Step out. Let your body adjust.';
+  document.getElementById('contrastBtn').style.display='none';
+  document.getElementById('contrastDone').style.display='block';
+  for(var i=0;i<sequence.length;i++) document.getElementById('cd'+i).className='contrast-dot done';
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · Move to recover, not to perform</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --red:#DC2626; --red-l:#FEF2F2;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--green); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--green); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--green); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--green); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* CIRCUIT */
+.slide-circuit { background:var(--navy); }
+.circuit-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.circuit-title { font-size:20px; font-weight:800; color:white; }
+.circuit-badge { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:20px; padding:4px 12px; font-size:12px; color:var(--green); font-weight:700; }
+.circuit-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:10px; }
+.circuit-progress { display:flex; gap:6px; margin-bottom:12px; }
+.cp-dot { flex:1; height:4px; border-radius:2px; background:rgba(255,255,255,0.1); transition:background 0.3s; }
+.cp-dot.done { background:var(--green); }
+.cp-dot.active { background:rgba(29,184,126,0.5); }
+.exercises { display:flex; flex-direction:column; gap:8px; }
+.exercise { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+.exercise.active-ex { border-color:var(--green); background:rgba(29,184,126,0.08); }
+.exercise.done-ex { border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.03); }
+.ex-emoji { font-size:28px; flex-shrink:0; }
+.ex-info { flex:1; }
+.ex-name { font-size:14px; font-weight:700; color:white; margin-bottom:2px; }
+.ex-reps { font-size:12px; color:rgba(255,255,255,0.4); }
+.ex-check { width:24px; height:24px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:transparent; transition:all 0.2s; }
+.exercise.done-ex .ex-check { background:var(--green); border-color:var(--green); color:white; }
+.rest-timer { background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2); border-radius:14px; padding:12px 16px; display:flex; gap:12px; align-items:center; }
+.rest-display { font-size:28px; font-weight:900; color:var(--green); font-variant-numeric:tabular-nums; min-width:52px; }
+.rest-info { flex:1; }
+.rest-label { font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:2px; }
+.rest-current { font-size:13px; font-weight:600; color:white; }
+.rest-btn { background:var(--green); border:none; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:700; color:white; cursor:pointer; flex-shrink:0; }
+.rest-btn.pause-btn { background:rgba(255,255,255,0.1); }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0A1F12 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--green); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.protocol-box { background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2); border-radius:14px; padding:16px; }
+.protocol-title { font-size:14px; font-weight:800; color:var(--green); margin-bottom:10px; }
+.protocol-item { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+.protocol-item:last-child { margin-bottom:0; }
+.protocol-dot { width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0; margin-top:5px; }
+.protocol-text { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">🏃</div>
+      <div class="cover-title">Move to recover,<br>not to perform.</div>
+      <div class="cover-sub">Exercise is the most powerful cortisol tool available. Most people use it wrong.</div>
+      <div class="cover-tag">Module S05 — Recovery movement</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">20'</div><div class="stat-lbl">circuit</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE PARADOX -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Exercise spikes cortisol.<br>Then drops it below baseline.</div>
+      <div class="s-sub">That's the mechanism. And it only works if you let it complete.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--green);">The cortisol curve of exercise</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>During exercise:</strong> cortisol rises — this is normal and necessary. It mobilises energy stores and prepares the body for effort.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>30–60 min after:</strong> cortisol drops significantly below your pre-exercise level. This is the recovery dividend — and why regular exercisers have lower baseline stress.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>The problem:</strong> if you exercise at maximum intensity when already stressed, cortisol spikes so high it doesn't fully recover. You feel worse, not better.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(29,184,126,0.08); border:1px solid rgba(29,184,126,0.2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); font-size:13px; line-height:1.6;">When you're burned out: <strong style="color:var(--green);">moderate intensity</strong> is more effective than high intensity. Walking, yoga, swimming, cycling at a conversational pace. The goal is the recovery drop — not performance.</div>
+      </div>
+    </div>
+
+    <!-- 2: WHICH TYPE -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">The right exercise<br>for your stress level.</div>
+      <div class="s-sub">Not all movement is equal when cortisol is already high.</div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#0F5132;">PSS-10 below 14 — You have capacity</div>
+        <div class="tip-text">Any exercise works. HIIT, resistance training, running. Your cortisol is low enough that the spike from intense exercise will fully recover. Add intensity progressively.</div>
+      </div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);">
+        <div class="tip-title" style="color:#78350F;">PSS-10 14–26 — Moderate stress</div>
+        <div class="tip-text">Moderate intensity only. 20–30 min walks, yoga, swimming, light cycling. Resistance training 2×/week — not more. This is the sweet spot for cortisol reduction without overloading the system.</div>
+      </div>
+      <div class="tip-card" style="background:var(--red-l); border-color:var(--red);">
+        <div class="tip-title" style="color:#991B1B;">PSS-10 above 26 — High stress</div>
+        <div class="tip-text">Gentle only. Walking, stretching, slow yoga. No HIIT. No intense cardio. Your cortisol is already near its ceiling — adding exercise cortisol on top makes it worse. Recovery first, performance later.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💡 Your PSS-10 score from your weekly check-in tells your AI which zone you're in. Recommendations adapt automatically — you don't need to track this yourself.</div>
+      </div>
+    </div>
+
+    <!-- 3: CIRCUIT -->
+    <div class="slide slide-circuit" data-index="3">
+      <div class="circuit-header">
+        <div class="circuit-title">Recovery circuit</div>
+        <div class="circuit-badge">20 minutes</div>
+      </div>
+      <div class="circuit-sub">Moderate intensity. No equipment. Anywhere.</div>
+      <div class="circuit-progress" id="cpBar">
+        <div class="cp-dot active" id="cpd0"></div>
+        <div class="cp-dot" id="cpd1"></div>
+        <div class="cp-dot" id="cpd2"></div>
+        <div class="cp-dot" id="cpd3"></div>
+        <div class="cp-dot" id="cpd4"></div>
+      </div>
+      <div class="exercises" id="exList">
+        <div class="exercise active-ex" id="ex0" onclick="markDone(0)">
+          <div class="ex-emoji">🚶</div>
+          <div class="ex-info">
+            <div class="ex-name">Brisk walk</div>
+            <div class="ex-reps">5 min · Conversational pace · Arms swinging</div>
+          </div>
+          <div class="ex-check" id="ec0">✓</div>
+        </div>
+        <div class="exercise" id="ex1" onclick="markDone(1)">
+          <div class="ex-emoji">🧘</div>
+          <div class="ex-info">
+            <div class="ex-name">Cat-cow stretch</div>
+            <div class="ex-reps">2 min · 10 slow cycles · Breath-guided</div>
+          </div>
+          <div class="ex-check" id="ec1">✓</div>
+        </div>
+        <div class="exercise" id="ex2" onclick="markDone(2)">
+          <div class="ex-emoji">🦵</div>
+          <div class="ex-info">
+            <div class="ex-name">Slow squats</div>
+            <div class="ex-reps">3 sets × 10 reps · 4 sec down, pause, 4 sec up</div>
+          </div>
+          <div class="ex-check" id="ec2">✓</div>
+        </div>
+        <div class="exercise" id="ex3" onclick="markDone(3)">
+          <div class="ex-emoji">💪</div>
+          <div class="ex-info">
+            <div class="ex-name">Wall push-ups</div>
+            <div class="ex-reps">3 sets × 10 reps · Controlled pace · No rushing</div>
+          </div>
+          <div class="ex-check" id="ec3">✓</div>
+        </div>
+        <div class="exercise" id="ex4" onclick="markDone(4)">
+          <div class="ex-emoji">🫁</div>
+          <div class="ex-info">
+            <div class="ex-name">Closing breath</div>
+            <div class="ex-reps">3 min · 5-5 cardiac coherence · Lying or sitting</div>
+          </div>
+          <div class="ex-check" id="ec4">✓</div>
+        </div>
+      </div>
+      <div class="rest-timer">
+        <div class="rest-display" id="restDisplay">0:45</div>
+        <div class="rest-info">
+          <div class="rest-label">Rest timer</div>
+          <div class="rest-current" id="restCurrent">Between sets — breathe slowly</div>
+        </div>
+        <button class="rest-btn" id="restBtn" onclick="restAction()">Rest</button>
+      </div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Movement as medicine</div>
+      <div class="final-title">The goal isn't fitness.<br>It's a lower<br>cortisol baseline.</div>
+      <div class="final-body">Every session of this circuit is a cortisol intervention. Not a workout. Not a punishment. A physiological reset that takes 20 minutes and works better than most supplements.</div>
+      <div class="protocol-box">
+        <div class="protocol-title">Your movement prescription</div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Frequency:</strong> 3×/week minimum. Not every day — recovery days matter as much as active days.</div></div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Timing:</strong> morning or early afternoon. Evening intense exercise delays sleep and raises evening cortisol.</div></div>
+        <div class="protocol-item"><div class="protocol-dot"></div><div class="protocol-text"><strong>Signal to watch:</strong> if you feel worse after exercise (not just tired) — reduce intensity. That's your body telling you cortisol is already too high.</div></div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S06 — The food-mood connection.</strong> What you eat changes your cortisol. Three foods that help. Three that make it worse.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0,total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[],bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){var d=document.createElement('div');d.className='dot'+(i===0?' active':'');bar.appendChild(d);dots.push(d);}
+function updateDots(){dots.forEach(function(d,i){d.className='dot'+(i===current?' active':i<current?' done':'');});}
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===2) return 'slide slide-white';
+  if(idx===3) return 'slide slide-circuit';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--teal)':'var(--green)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){var d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1);},{passive:true});
+
+var exDone=[false,false,false,false,false];
+function markDone(idx){
+  exDone[idx]=!exDone[idx];
+  var ex=document.getElementById('ex'+idx);
+  if(exDone[idx]){ex.className='exercise done-ex';var n=idx+1;if(n<5)document.getElementById('ex'+n).className='exercise active-ex';}
+  else{ex.className='exercise';}
+  exDone.forEach(function(d,i){
+    var dot=document.getElementById('cpd'+i);
+    dot.className='cp-dot'+(d?' done':i===exDone.indexOf(false)?' active':'');
+  });
+}
+
+var restRunning=false,restRemain=45,restInterval=null;
+function rFmt(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+function restAction(){
+  if(!restRunning){
+    restRunning=true;restRemain=45;
+    document.getElementById('restBtn').textContent='Stop';
+    document.getElementById('restBtn').className='rest-btn pause-btn';
+    document.getElementById('restCurrent').textContent='Breathe slowly — recovery window';
+    restInterval=setInterval(function(){
+      restRemain--;
+      document.getElementById('restDisplay').textContent=rFmt(restRemain);
+      if(restRemain<=0){
+        clearInterval(restInterval);restRunning=false;
+        document.getElementById('restDisplay').textContent='GO';
+        document.getElementById('restCurrent').textContent='Next set — tap exercise when done';
+        document.getElementById('restBtn').textContent='Rest';
+        document.getElementById('restBtn').className='rest-btn';
+      }
+    },1000);
+  } else {
+    clearInterval(restInterval);restRunning=false;restRemain=45;
+    document.getElementById('restDisplay').textContent=rFmt(restRemain);
+    document.getElementById('restBtn').textContent='Rest';
+    document.getElementById('restBtn').className='rest-btn';
+    document.getElementById('restCurrent').textContent='Between sets — breathe slowly';
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>
