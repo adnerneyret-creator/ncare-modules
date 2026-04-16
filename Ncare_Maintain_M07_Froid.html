@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · 30 seconds that wake your metabolism</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --ice:#B8E4F9; --ice-d:#0369A1;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--ice-d); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--ice-d); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--ice-d); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(3,105,161,0.2); border:1px solid rgba(3,105,161,0.4); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--ice); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:40px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.7; margin-top:4px; line-height:1.4; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* TIMER */
+.slide-timer { background:linear-gradient(180deg, #0C1929 0%, #0F172A 100%); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.timer-label { font-size:12px; font-weight:700; color:var(--ice); letter-spacing:2px; text-transform:uppercase; }
+.timer-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.timer-ring svg { transform:rotate(-90deg); }
+.timer-ring circle { fill:none; stroke-width:8; }
+.timer-ring .bg { stroke:rgba(255,255,255,0.08); }
+.timer-ring .progress { stroke:var(--ice-d); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.timer-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.timer-time { font-size:52px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.timer-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.timer-temp { font-size:12px; color:var(--ice); margin-top:2px; letter-spacing:1px; }
+.timer-msg { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:260px; }
+.timer-btn { background:var(--ice-d); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.timer-btn.pause { background:rgba(255,255,255,0.1); }
+.timer-done { background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--green); font-weight:600; display:none; text-align:center; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(3,105,161,0.2); border:1px solid rgba(3,105,161,0.35); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--ice); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.benefit-list { display:flex; flex-direction:column; gap:8px; }
+.benefit-item { background:var(--navy2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.benefit-icon { font-size:20px; flex-shrink:0; }
+.benefit-text { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.4; }
+.benefit-text strong { color:white; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🧊</div>
+      <div class="cover-title">30 seconds that<br>wake your metabolism.</div>
+      <div class="cover-sub">You're already in the shower. The only thing that changes is the last 30 seconds.</div>
+      <div class="cover-tag">Module 07 — Cold exposure & thermogenesis</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">3'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">30 sec</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">What happens in 30 seconds of cold.</div>
+      <div class="s-sub">Your body's response is immediate — and metabolic.</div>
+      <div style="display:flex; gap:10px;">
+        <div class="highlight-box" style="background:rgba(3,105,161,0.15); flex:1;">
+          <div class="highlight-num" style="color:var(--ice);">+300%</div>
+          <div class="highlight-lbl" style="color:var(--ice);">Norepinephrine</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">released in 30 sec of cold water</div>
+        </div>
+        <div class="highlight-box" style="background:rgba(29,184,126,0.12); flex:1;">
+          <div class="highlight-num" style="color:var(--green);">+80%</div>
+          <div class="highlight-lbl" style="color:var(--green);">Brown fat active</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">cold activates fat-burning tissue</div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--ice-d);">The 3-step biological response</div>
+        <div class="item"><div class="item-dot" style="background:var(--ice-d);"></div><div class="item-text"><strong>Brown adipose tissue (BAT) activates.</strong> Unlike white fat (storage), brown fat burns calories to generate heat. Cold exposure is the most effective activator known — more than exercise.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Norepinephrine spikes.</strong> This hormone mobilises stored fat for energy, improves mood, and sharpens focus. The cold-induced spike lasts 3–4 hours after exposure.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Insulin sensitivity improves.</strong> Regular cold exposure increases glucose uptake in muscle cells — the same mechanism as post-meal walking, but triggered differently.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Source: Cypess A.M. et al., NEJM (2009) · van Marken Lichtenbelt W.D. et al., NEJM (2009) · Søberg S. et al., Cell Reports Medicine (2021)</div>
+      </div>
+    </div>
+
+    <!-- 2: THE PROTOCOL -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">The simplest protocol<br>in this programme.</div>
+      <div class="s-sub">One change to something you already do every day.</div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);">
+        <div class="tip-title" style="color:#0670A0;">Step 1 — Shower as normal</div>
+        <div class="tip-text">Take your regular warm shower. Nothing changes here. The habit is already established. We're only modifying the ending.</div>
+      </div>
+      <div class="tip-card" style="background:#EFF9FF; border-color:var(--ice-d);">
+        <div class="tip-title" style="color:var(--ice-d);">Step 2 — Switch to cold for the last 30 seconds</div>
+        <div class="tip-text">Turn the dial to cold. As cold as your system allows. 30 seconds minimum — 60 seconds is better. Keep breathing. The discomfort peaks at 10 seconds and then becomes manageable.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#147A53;">Step 3 — Don't warm up immediately</div>
+        <div class="tip-text">Step out cold. Don't turn the heat back on. Towel dry normally. The shivering (if any) is your brown fat burning calories. Let it complete. This takes 2–3 minutes.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">⚠️ <strong style="color:var(--navy);">Start gradually.</strong> Week 1: 15 seconds. Week 2: 30 seconds. Week 3+: 30–60 seconds. Never force it. The benefit comes from consistency, not suffering.</div>
+      </div>
+    </div>
+
+    <!-- 3: TIMER -->
+    <div class="slide slide-timer" data-index="3">
+      <div class="timer-label">Cold exposure timer</div>
+      <div class="timer-ring">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle class="bg" cx="100" cy="100" r="88"/>
+          <circle class="progress" id="timerCircle" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="553"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timerDisplay">30</div>
+          <div class="timer-unit">seconds</div>
+          <div class="timer-temp" id="timerTemp">❄️ stay cold</div>
+        </div>
+      </div>
+      <div class="timer-msg" id="timerMsg">Switch to cold — then tap start.</div>
+      <button class="timer-btn" id="timerBtn" onclick="timerAction()">Start cold →</button>
+      <div class="timer-done" id="timerDone">🧊 Done. Your metabolism just woke up.</div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">MAINTAIN · Daily habit</div>
+      <div class="final-title">30 seconds.<br>Every shower.<br>That's the whole habit.</div>
+      <div class="final-body">The benefits compound over days, not hours. By Day 7, your brown fat density increases measurably. By Day 14, the cold feels easier — because your body is adapting.</div>
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <div class="benefit-icon">🔥</div>
+          <div class="benefit-text"><strong>Metabolism:</strong> brown fat activation burns 100–300 extra calories per day with regular cold exposure.</div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🧠</div>
+          <div class="benefit-text"><strong>Mood & focus:</strong> norepinephrine spike lasts 3–4 hours. Many people report replacing their morning coffee.</div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">💤</div>
+          <div class="benefit-text"><strong>Sleep:</strong> morning cold exposure helps regulate cortisol rhythm — lower cortisol at night means deeper sleep.</div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🩸</div>
+          <div class="benefit-text"><strong>Insulin sensitivity:</strong> 5 days of cold exposure improves glucose uptake in muscles — a direct rebound prevention mechanism.</div>
+        </div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">Module 08 — Strong without a gym.</strong> Resistance training at home in 20 minutes — muscle mass is your metabolic insurance.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 5;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); });
+}
+function getClass(idx) {
+  if (idx===0) return 'slide slide-cover';
+  if (idx===2) return 'slide slide-white';
+  if (idx===3) return 'slide slide-timer';
+  if (idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--ice-d)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50)navigate(d>0?1:-1);
+},{passive:true});
+
+// TIMER 30s
+var timerRunning=false, timerDone=false;
+var totalSec=30, remaining=30;
+var timerInterval=null;
+var circ=553;
+var messages=['Stay in it. 10 more seconds.','Almost there. Don\'t stop now.','5 seconds. You\'ve got this.'];
+
+function timerAction() {
+  if(timerDone) return;
+  if(!timerRunning) {
+    timerRunning=true;
+    document.getElementById('timerBtn').textContent='Pause';
+    document.getElementById('timerBtn').className='timer-btn pause';
+    document.getElementById('timerMsg').textContent='Breathe slowly. The discomfort peaks at 10 seconds.';
+    timerInterval=setInterval(function(){
+      remaining--;
+      document.getElementById('timerDisplay').textContent=remaining;
+      var progress=(totalSec-remaining)/totalSec;
+      var offset=circ*(1-progress);
+      document.getElementById('timerCircle').style.strokeDashoffset=offset;
+      if(remaining===20) document.getElementById('timerMsg').textContent=messages[0];
+      if(remaining===10) document.getElementById('timerMsg').textContent=messages[1];
+      if(remaining===5)  document.getElementById('timerMsg').textContent=messages[2];
+      if(remaining<=0){
+        clearInterval(timerInterval);
+        timerDone=true;
+        timerRunning=false;
+        document.getElementById('timerDisplay').textContent='✓';
+        document.getElementById('timerTemp').textContent='';
+        document.getElementById('timerMsg').textContent='Step out cold. Let your body warm itself.';
+        document.getElementById('timerBtn').style.display='none';
+        document.getElementById('timerDone').style.display='block';
+        document.getElementById('timerCircle').style.stroke='var(--green)';
+      }
+    },1000);
+  } else {
+    timerRunning=false;
+    clearInterval(timerInterval);
+    document.getElementById('timerBtn').textContent='Resume →';
+    document.getElementById('timerBtn').className='timer-btn';
+    document.getElementById('timerMsg').textContent='Paused. Stay cold if you can.';
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe to navigate <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

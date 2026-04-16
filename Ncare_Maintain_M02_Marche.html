@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · 15 minutes. Not one more.</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --ink50:#64748B; --ink15:#CBD5E1;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--green); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--green); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--green); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(29,184,126,0.15); border:1px solid rgba(29,184,126,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--green); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:40px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.7; margin-top:4px; line-height:1.4; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* TIMER */
+.slide-timer { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.timer-label { font-size:12px; font-weight:700; color:var(--green); letter-spacing:2px; text-transform:uppercase; }
+.timer-ring { position:relative; width:200px; height:200px; margin:0 auto; }
+.timer-ring svg { transform:rotate(-90deg); }
+.timer-ring circle { fill:none; stroke-width:8; }
+.timer-ring .bg { stroke:rgba(255,255,255,0.08); }
+.timer-ring .progress { stroke:var(--green); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.timer-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+.timer-time { font-size:48px; font-weight:900; color:white; line-height:1; font-variant-numeric:tabular-nums; }
+.timer-unit { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.timer-msg { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.5; max-width:240px; text-align:center; }
+.timer-btn { background:var(--green); border:none; border-radius:22px; padding:14px 32px; font-size:15px; font-weight:700; color:white; cursor:pointer; }
+.timer-btn.pause { background:rgba(255,255,255,0.1); }
+.timer-btn-row { display:flex; gap:10px; justify-content:center; }
+.timer-streak { background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2); border-radius:12px; padding:10px 16px; font-size:13px; color:var(--green); font-weight:600; }
+
+/* STREAK SLIDE */
+.slide-streak { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:14px; }
+.streak-emoji { font-size:56px; }
+.streak-title { font-size:24px; font-weight:800; color:white; }
+.streak-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; max-width:280px; }
+.streak-days { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.streak-day { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+.streak-day.done { background:var(--green); color:white; }
+.streak-day.today { background:rgba(29,184,126,0.2); border:2px solid var(--green); color:var(--green); }
+.streak-day.empty { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.2); }
+.streak-cta { background:rgba(29,184,126,0.12); border:1px solid rgba(29,184,126,0.25); border-radius:14px; padding:14px 20px; }
+.streak-cta-title { font-size:14px; font-weight:700; color:var(--green); margin-bottom:4px; }
+.streak-cta-sub { font-size:12px; color:rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🚶</div>
+      <div class="cover-title">15 minutes.<br>Not one more.</div>
+      <div class="cover-sub">One habit. More powerful than any supplement you've ever taken.</div>
+      <div class="cover-tag">Module 02 — Post-meal walk</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">3'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Timer</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE SCIENCE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">A 30% drop in blood sugar spikes.</div>
+      <div class="s-sub">From a 15-minute walk. No gym. No equipment.</div>
+      <div style="display:flex; gap:10px;">
+        <div class="highlight-box" style="background:rgba(29,184,126,0.12); flex:1;">
+          <div class="highlight-num" style="color:var(--green);">30%</div>
+          <div class="highlight-lbl" style="color:var(--green);">Less glucose spike</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">after a meal with a 15-min walk vs rest</div>
+        </div>
+        <div class="highlight-box" style="background:rgba(201,168,76,0.12); flex:1;">
+          <div class="highlight-num" style="color:var(--gold);">2×</div>
+          <div class="highlight-lbl" style="color:var(--gold);">More effective</div>
+          <div class="highlight-sub" style="color:rgba(255,255,255,0.5);">after meals vs same walk at another time</div>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--green);">Why after — not before</div>
+        <div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Muscles act as glucose sponges.</strong> When you walk right after eating, your muscles absorb glucose directly from the bloodstream — before insulin needs to store it as fat.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>The window is 30 minutes.</strong> The glucose spike peaks around 30–45 minutes after a meal. Walking in this window intercepts it at its source.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>No effort required.</strong> A gentle pace works. You don't need to sweat. The effect is mechanical — muscles pulling glucose — not cardiovascular.</div></div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+        <div class="item-text" style="color:rgba(255,255,255,0.4); font-size:12px;">Source: Buffey A.J. et al., Sports Medicine (2022) · DiPietro L. et al., Diabetes Care (2013)</div>
+      </div>
+    </div>
+
+    <!-- 2: THE RULES -->
+    <div class="slide slide-white" data-index="2">
+      <div class="s-title">The only 3 rules.</div>
+      <div class="s-sub">Simple enough to never have an excuse.</div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#147A53;">1.  Start within 30 minutes of finishing your meal</div>
+        <div class="tip-text">You don't need to time it perfectly. Just don't sit down for 30 minutes after eating. The window is generous.</div>
+      </div>
+      <div class="tip-card" style="background:var(--gold-l); border-color:var(--gold);">
+        <div class="tip-title" style="color:var(--gold-d);">2.  Walk for exactly 15 minutes</div>
+        <div class="tip-text">Not 5. Not 45. 15 is the minimum effective dose. More is fine — but 15 is enough. This boundary removes the "I don't have time" objection permanently.</div>
+      </div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);">
+        <div class="tip-title" style="color:#0670A0;">3.  No running shoes required</div>
+        <div class="tip-text">Socks at home, shoes outside. Around the block, in a corridor, on a balcony. The terrain doesn't matter. The timing does.</div>
+      </div>
+      <div style="background:#F8F9FA; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12px; color:var(--ink50); line-height:1.6;">💡 <strong style="color:var(--navy);">Can't walk?</strong> Light housework, standing, gentle stretching — any movement activates the same glucose absorption mechanism. The goal is muscle contraction, not steps.</div>
+      </div>
+    </div>
+
+    <!-- 3: TIMER -->
+    <div class="slide slide-timer" data-index="3">
+      <div class="timer-label">Post-meal walk timer</div>
+      <div class="timer-ring">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle class="bg" cx="100" cy="100" r="88"/>
+          <circle class="progress" id="timerCircle" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timerDisplay">15:00</div>
+          <div class="timer-unit">minutes</div>
+        </div>
+      </div>
+      <div class="timer-msg" id="timerMsg">Start walking, then tap the button.</div>
+      <div class="timer-btn-row">
+        <button class="timer-btn" id="timerStartBtn" onclick="timerAction()">Start walking →</button>
+      </div>
+      <div class="timer-streak" id="timerStreak" style="display:none;">✓ Walk logged for today</div>
+    </div>
+
+    <!-- 4: STREAK -->
+    <div class="slide slide-streak" data-index="4">
+      <div class="streak-emoji">🔥</div>
+      <div class="streak-title">Day 1. Let's go.</div>
+      <div class="streak-sub">Every walk you take in the next 28 days builds something your body can't forget.</div>
+      <div class="streak-days" id="streakDays"></div>
+      <div class="streak-cta">
+        <div class="streak-cta-title">Your next walk: after your next meal</div>
+        <div class="streak-cta-sub">Your AI will remind you at the right time · No calendar needed</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2); text-align:left;">
+        <div class="item-text" style="color:rgba(255,255,255,0.6); font-size:13px; line-height:1.6;">Studies show habits form in <strong style="color:white;">66 days on average</strong> — not 21. Be patient with yourself. The streak is a tool, not a punishment. Missing one day costs nothing.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+// NAVIGATION
+var current = 0, total = 5;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d, i) {
+    d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  });
+}
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 2) return 'slide slide-white';
+  if (idx === 3) return 'slide slide-timer';
+  if (idx === 4) return 'slide slide-streak';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  if (current === 4) buildStreak();
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '✓ Done' : 'Next →';
+  nb.style.background = current === total - 1 ? 'var(--gold)' : 'var(--green)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0, sy = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) {
+  var dx = sx - e.changedTouches[0].clientX; var dy = (typeof sy !== "undefined") ? sy - e.changedTouches[0].clientY : 0; if (Math.abs(dx) > 50 && Math.abs(dy) < 80) navigate(dx > 0 ? 1 : -1);
+}, {passive:true});
+
+// TIMER
+var timerInterval = null;
+var timerRunning = false;
+var timerDone = false;
+var totalSeconds = 15 * 60;
+var remainingSeconds = totalSeconds;
+var circumference = 553;
+
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timerDisplay').textContent = formatTime(remainingSeconds);
+  var progress = (totalSeconds - remainingSeconds) / totalSeconds;
+  var offset = circumference * (1 - progress);
+  document.getElementById('timerCircle').style.strokeDashoffset = offset;
+}
+
+function timerAction() {
+  if (timerDone) return;
+  if (!timerRunning) {
+    timerRunning = true;
+    document.getElementById('timerStartBtn').textContent = 'Pause';
+    document.getElementById('timerStartBtn').className = 'timer-btn pause';
+    document.getElementById('timerMsg').textContent = 'Keep moving. You\'re doing great.';
+    timerInterval = setInterval(function() {
+      remainingSeconds--;
+      updateTimerDisplay();
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerDone = true;
+        timerRunning = false;
+        document.getElementById('timerDisplay').textContent = '✓';
+        document.getElementById('timerMsg').textContent = '15 minutes done. Your glucose thanks you.';
+        document.getElementById('timerStartBtn').style.display = 'none';
+        document.getElementById('timerStreak').style.display = 'block';
+        document.getElementById('timerCircle').style.stroke = 'var(--gold)';
+      }
+    }, 1000);
+  } else {
+    timerRunning = false;
+    clearInterval(timerInterval);
+    document.getElementById('timerStartBtn').textContent = 'Resume →';
+    document.getElementById('timerStartBtn').className = 'timer-btn';
+    document.getElementById('timerMsg').textContent = 'Paused. Tap to resume when ready.';
+  }
+}
+
+// STREAK
+function buildStreak() {
+  var container = document.getElementById('streakDays');
+  if (container.children.length > 0) return;
+  for (var i = 1; i <= 28; i++) {
+    var d = document.createElement('div');
+    d.className = 'streak-day ' + (i === 1 ? (timerDone ? 'done' : 'today') : 'empty');
+    d.textContent = i;
+    container.appendChild(d);
+  }
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe to navigate <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · The hunger coming back</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --teal:#0891B2; --teal-l:#ECFEFF;
+  --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--coral); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--coral); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+
+/* COVER */
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--coral); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(240,80,58,0.15); border:1px solid rgba(240,80,58,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--coral); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+
+/* DARK */
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+
+/* WHITE */
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* TEST HUNGER */
+.slide-test { background:var(--navy); }
+.test-question { background:var(--navy2); border-radius:16px; padding:18px; }
+.test-q-title { font-size:15px; font-weight:700; color:white; margin-bottom:14px; line-height:1.4; }
+.test-options { display:flex; flex-direction:column; gap:8px; }
+.test-btn { background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.12); border-radius:12px; padding:13px 16px; text-align:left; cursor:pointer; transition:all 0.2s; }
+.test-btn.physical { border-color:var(--green); background:rgba(29,184,126,0.1); }
+.test-btn.emotional { border-color:var(--coral); background:rgba(240,80,58,0.1); }
+.test-btn-label { font-size:13px; color:rgba(255,255,255,0.85); font-weight:500; }
+.test-result { display:none; border-radius:14px; padding:14px 16px; }
+.test-result.visible { display:block; }
+
+/* PROTOCOL */
+.protocol-steps { display:flex; flex-direction:column; gap:10px; }
+.proto-step { border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start; }
+.proto-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.proto-info { flex:1; }
+.proto-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+.proto-desc { font-size:12px; line-height:1.5; opacity:0.75; }
+
+/* PANTRY */
+.pantry-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.pantry-item { background:var(--navy2); border-radius:12px; padding:12px; text-align:center; }
+.pantry-emoji { font-size:28px; margin-bottom:6px; }
+.pantry-name { font-size:12px; font-weight:700; color:white; margin-bottom:3px; }
+.pantry-why { font-size:11px; color:rgba(255,255,255,0.45); line-height:1.3; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#1C2333 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(240,80,58,0.15); border:1px solid rgba(240,80,58,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--coral); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.final-highlight { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.2); border-radius:14px; padding:16px; }
+.final-highlight-title { font-size:14px; font-weight:800; color:var(--coral); margin-bottom:8px; }
+.final-highlight-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · MAINTAIN</div>
+      <div class="cover-emoji">🌅</div>
+      <div class="cover-title">The hunger<br>coming back.</div>
+      <div class="cover-sub">If you feel hunger returning — you're ready for this module. You knew it was coming.</div>
+      <div class="cover-tag">Module 05 — When appetite returns</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Test</div><div class="stat-lbl">included</div></div>
+      </div>
+    </div>
+
+    <!-- 1: THE BIOLOGY -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">This is normal.<br>And it's manageable.</div>
+      <div class="s-sub">Understanding what's happening removes the fear.</div>
+      <div class="card-dark" style="background:rgba(240,80,58,0.08); border:1px solid rgba(240,80,58,0.2);">
+        <div class="card-title" style="color:var(--coral);">What happens when hunger returns</div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Ghrelin rises.</strong> GLP-1 suppressed your hunger hormone. Without it, ghrelin bounces back — often above your original baseline. This is temporary. It stabilises in 4–8 weeks.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Fullness signals weaken.</strong> Leptin — the satiety hormone — takes longer to register. You may feel hungry again 1–2 hours after eating. This is hormonal, not a character flaw.</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>The reward system reactivates.</strong> Food becomes more rewarding again. Cravings feel stronger. This is the dopamine system returning to baseline — not a relapse.</div></div>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.6); font-size:13px; line-height:1.6;">The window of vulnerability is <strong style="color:white;">weeks 2–6</strong> after stopping GLP-1. If you build habits during this window, they become your new baseline. That's exactly what Maintain is designed for.</div>
+      </div>
+    </div>
+
+    <!-- 2: PHYSICAL VS EMOTIONAL -->
+    <div class="slide slide-test" data-index="2">
+      <div class="s-title">Physical hunger or emotional hunger?</div>
+      <div class="s-sub">The 2-question test. Takes 10 seconds.</div>
+      <div class="test-question" id="testQ1">
+        <div class="test-q-title">When did you last eat a proper meal?</div>
+        <div class="test-options">
+          <button class="test-btn" onclick="answerQ1('physical')">
+            <div class="test-btn-label">More than 3–4 hours ago</div>
+          </button>
+          <button class="test-btn" onclick="answerQ1('emotional')">
+            <div class="test-btn-label">Less than 2 hours ago</div>
+          </button>
+        </div>
+      </div>
+      <div class="test-question" id="testQ2" style="display:none;">
+        <div class="test-q-title">Would a plain boiled egg satisfy this feeling?</div>
+        <div class="test-options">
+          <button class="test-btn" onclick="answerQ2('physical')">
+            <div class="test-btn-label">Yes — I'd eat anything right now</div>
+          </button>
+          <button class="test-btn" onclick="answerQ2('emotional')">
+            <div class="test-btn-label">No — I specifically want something sweet or salty</div>
+          </button>
+        </div>
+      </div>
+      <div class="test-result" id="resultPhysical" style="background:rgba(29,184,126,0.1); border:1px solid rgba(29,184,126,0.2);">
+        <div style="font-size:13px; font-weight:700; color:var(--green); margin-bottom:6px;">✓ Physical hunger</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5;">Your body needs fuel. Eat a balanced meal — protein + fibre. Don't wait. Ignoring physical hunger leads to overeating at the next meal.</div>
+      </div>
+      <div class="test-result" id="resultEmotional" style="background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.2);">
+        <div style="font-size:13px; font-weight:700; color:var(--coral); margin-bottom:6px;">→ Emotional hunger</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5;">This isn't your stomach talking — it's your brain seeking comfort. Use the STOP method from Module 04. Or go to the 10-minute protocol on the next slide.</div>
+      </div>
+    </div>
+
+    <!-- 3: PROTOCOL -->
+    <div class="slide slide-dark" data-index="3">
+      <div class="s-title">The 10-minute protocol.</div>
+      <div class="s-sub">Before you decide to eat — do this first.</div>
+      <div class="protocol-steps">
+        <div class="proto-step" style="background:rgba(8,145,178,0.12);">
+          <div class="proto-num" style="background:var(--teal); color:white;">1</div>
+          <div class="proto-info">
+            <div class="proto-title" style="color:var(--teal);">Drink a full glass of water</div>
+            <div class="proto-desc" style="color:rgba(255,255,255,0.6);">Wait 2 minutes. Dehydration is mistaken for hunger in about 30% of cases. This one step resolves a third of all "false hunger" signals.</div>
+          </div>
+        </div>
+        <div class="proto-step" style="background:rgba(245,166,35,0.12);">
+          <div class="proto-num" style="background:var(--amber); color:var(--navy);">2</div>
+          <div class="proto-info">
+            <div class="proto-title" style="color:var(--amber);">Ask: physical or emotional?</div>
+            <div class="proto-desc" style="color:rgba(255,255,255,0.6);">Use the 2-question test from the previous slide. If emotional — go to step 3. If physical — go eat a real meal.</div>
+          </div>
+        </div>
+        <div class="proto-step" style="background:rgba(29,184,126,0.12);">
+          <div class="proto-num" style="background:var(--green); color:white;">3</div>
+          <div class="proto-info">
+            <div class="proto-title" style="color:var(--green);">Wait 10 minutes — actively</div>
+            <div class="proto-desc" style="color:rgba(255,255,255,0.6);">Go outside. Do 20 squats. Call someone. Change your environment. The hunger will either pass or clarify. Either outcome is useful information.</div>
+          </div>
+        </div>
+        <div class="proto-step" style="background:rgba(201,168,76,0.12);">
+          <div class="proto-num" style="background:var(--gold); color:var(--navy);">4</div>
+          <div class="proto-info">
+            <div class="proto-title" style="color:var(--gold);">Decide consciously</div>
+            <div class="proto-desc" style="color:rgba(255,255,255,0.6);">You've now made the choice deliberate. Whether you eat or not — it's a decision, not a reaction. That's the only difference that matters long-term.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: PANTRY -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">5 foods that actually work.</div>
+      <div class="s-sub">Keep these at home. They handle 80% of hunger situations.</div>
+      <div class="pantry-grid">
+        <div class="pantry-item">
+          <div class="pantry-emoji">🥚</div>
+          <div class="pantry-name">Eggs</div>
+          <div class="pantry-why">Highest satiety per calorie. 2 eggs = 2–3h of fullness.</div>
+        </div>
+        <div class="pantry-item">
+          <div class="pantry-emoji">🥜</div>
+          <div class="pantry-name">Almonds</div>
+          <div class="pantry-why">Fat + protein combo. Slows glucose absorption. 15 almonds = enough.</div>
+        </div>
+        <div class="pantry-item">
+          <div class="pantry-emoji">🫘</div>
+          <div class="pantry-name">Lentils</div>
+          <div class="pantry-why">Highest fibre-to-hunger ratio of any food. Prep once, eat all week.</div>
+        </div>
+        <div class="pantry-item">
+          <div class="pantry-emoji">🥑</div>
+          <div class="pantry-name">Avocado</div>
+          <div class="pantry-why">Monounsaturated fat activates CCK — the satiety hormone. Half an avocado is a meal anchor.</div>
+        </div>
+        <div class="pantry-item" style="grid-column:span 2;">
+          <div class="pantry-emoji">🍵</div>
+          <div class="pantry-name">Green tea</div>
+          <div class="pantry-why">EGCG mildly suppresses ghrelin. L-theanine reduces stress-driven eating. The best non-food tool in the pantry.</div>
+        </div>
+      </div>
+      <div class="card-dark" style="background:rgba(255,255,255,0.04);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Your AI tracks your appetite patterns over 30 days. If hunger spikes consistently at a certain time, you'll receive a personalised recommendation before that window opens.</div>
+      </div>
+    </div>
+
+    <!-- 5: FINAL -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">MAINTAIN · You're not alone in this</div>
+      <div class="final-title">The hunger<br>is information.<br>Not a threat.</div>
+      <div class="final-body">Every time you feel hunger and respond deliberately — not reactively — you're rewiring the relationship between your brain and food. That's the real work of maintenance.</div>
+      <div class="final-highlight">
+        <div class="final-highlight-title">What your AI is watching</div>
+        <div class="final-highlight-text">Your daily appetite check-in reveals patterns you can't see yourself. If your VAS appetite score rises for 3 consecutive days, your AI will surface this module automatically — before you need it, not after.</div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">Module 06 — Your body sends signals.</strong> The 3 early warning signs of rebound — and what to do about each one.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+function updateDots() {
+  dots.forEach(function(d,i) {
+    d.className = 'dot'+(i===current?' active':i<current?' done':'');
+  });
+}
+function getClass(idx) {
+  if (idx===0) return 'slide slide-cover';
+  if (idx===2) return 'slide slide-test';
+  if (idx===5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current+dir;
+  if (next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next;
+  slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--coral)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50)navigate(d>0?1:-1);
+},{passive:true});
+
+// TEST
+var q1Answer = null;
+function answerQ1(type) {
+  q1Answer = type;
+  document.getElementById('testQ1').style.display = 'none';
+  if (type === 'physical') {
+    document.getElementById('testQ2').style.display = 'block';
+  } else {
+    showResult('emotional');
+  }
+}
+function answerQ2(type) {
+  document.getElementById('testQ2').style.display = 'none';
+  showResult(type);
+}
+function showResult(type) {
+  var r = document.getElementById('result' + (type === 'physical' ? 'Physical' : 'Emotional'));
+  r.className = 'test-result visible';
+}
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe to navigate <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+</body>
+</html>
