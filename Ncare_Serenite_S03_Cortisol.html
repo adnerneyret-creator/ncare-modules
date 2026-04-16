@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ncare · What cortisol does to your body</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0C4A6E;
+  --green:#1DB87E; --green-l:#E8FAF3;
+  --coral:#F0503A; --coral-l:#FFF0EE;
+  --amber:#F5A623; --amber-l:#FEF6E4;
+  --purple:#7C3AED; --ink50:#64748B;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--teal); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--teal); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:white; }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--teal); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+.item-text strong { color:white; }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; margin-bottom:2px; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+
+/* BODY MAP */
+.body-map { background:var(--navy2); border-radius:16px; padding:16px; }
+.body-map-title { font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; }
+.body-systems { display:flex; flex-direction:column; gap:8px; }
+.body-system { border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start; cursor:pointer; transition:all 0.2s; border:1.5px solid transparent; }
+.body-system.expanded { border-color:rgba(8,145,178,0.3); }
+.system-icon { font-size:22px; flex-shrink:0; }
+.system-info { flex:1; }
+.system-name { font-size:13px; font-weight:700; margin-bottom:2px; }
+.system-short { font-size:12px; line-height:1.4; opacity:0.7; }
+.system-detail { font-size:12px; line-height:1.5; margin-top:6px; display:none; padding-top:6px; border-top:0.5px solid rgba(255,255,255,0.1); }
+.body-system.expanded .system-detail { display:block; }
+.system-arrow { font-size:12px; color:rgba(255,255,255,0.3); flex-shrink:0; transition:transform 0.2s; }
+.body-system.expanded .system-arrow { transform:rotate(180deg); color:var(--teal); }
+
+/* CORTISOL CURVE */
+.curve-wrap { background:var(--navy2); border-radius:16px; padding:16px; }
+.curve-title { font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+.curve-labels { display:flex; justify-content:space-between; margin-top:8px; }
+.curve-label { font-size:11px; color:rgba(255,255,255,0.4); }
+.curve-insight { background:rgba(8,145,178,0.1); border-radius:10px; padding:10px 12px; margin-top:10px; font-size:12px; color:rgba(255,255,255,0.7); line-height:1.5; }
+
+/* CHECKLIST SLIDE */
+.slide-check { background:var(--navy); }
+.check-intro { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.check-items { display:flex; flex-direction:column; gap:8px; }
+.check-item { background:var(--navy2); border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer; transition:all 0.2s; border:2px solid transparent; }
+.check-item.checked { border-color:var(--coral); background:rgba(240,80,58,0.08); }
+.check-box { width:24px; height:24px; border-radius:7px; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; position:relative; transition:all 0.2s; }
+.check-item.checked .check-box { background:var(--coral); border-color:var(--coral); }
+.check-item.checked .check-box::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:13px; font-weight:800; color:white; }
+.check-label { font-size:13px; color:white; font-weight:500; }
+.check-result { display:none; border-radius:14px; padding:14px 16px; }
+.check-result.visible { display:block; }
+
+/* FINAL */
+.slide-final { background:linear-gradient(160deg,#0C2A3A 0%,#0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(8,145,178,0.15); border:1px solid rgba(8,145,178,0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--teal); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:22px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.interrupt-list { display:flex; flex-direction:column; gap:8px; }
+.interrupt-item { background:rgba(8,145,178,0.1); border:1px solid rgba(8,145,178,0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.interrupt-icon { font-size:20px; flex-shrink:0; }
+.interrupt-text { font-size:13px; color:rgba(255,255,255,0.85); line-height:1.4; }
+.interrupt-text strong { color:white; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">NCARE · SÉRÉNITÉ</div>
+      <div class="cover-emoji">⚗️</div>
+      <div class="cover-title">What cortisol<br>does to your body.</div>
+      <div class="cover-sub">The biology is not abstract. It's happening right now, in specific systems, in a specific order.</div>
+      <div class="cover-tag">Module S03 — Cortisol biology</div>
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">slides</div></div>
+        <div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">to read</div></div>
+        <div class="stat"><div class="stat-num">Interactive</div><div class="stat-lbl">body map</div></div>
+      </div>
+    </div>
+
+    <!-- 1: CORTISOL CURVE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Your cortisol has<br>a natural rhythm.</div>
+      <div class="s-sub">When that rhythm breaks, everything breaks with it.</div>
+      <div class="curve-wrap">
+        <div class="curve-title">Cortisol level across the day</div>
+        <svg viewBox="0 0 300 100" width="100%" height="100px" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0891B2" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#0891B2" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,85 C10,85 15,20 30,15 C50,8 70,50 100,60 C130,70 160,72 200,75 C240,78 270,82 300,85 Z" fill="url(#cg)"/>
+          <path d="M0,85 C10,85 15,20 30,15 C50,8 70,50 100,60 C130,70 160,72 200,75 C240,78 270,82 300,85" fill="none" stroke="#0891B2" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="30" cy="15" r="4" fill="#0891B2"/>
+          <text x="25" y="10" fill="rgba(255,255,255,0.6)" font-size="8">Peak</text>
+          <line x1="30" y1="15" x2="30" y2="85" stroke="rgba(8,145,178,0.3)" stroke-dasharray="3,3"/>
+          <path d="M0,80 C30,80 50,40 80,35 C110,30 140,55 170,60 C200,65 230,70 300,72" fill="none" stroke="rgba(240,80,58,0.6)" stroke-width="1.5" stroke-dasharray="4,3"/>
+        </svg>
+        <div class="curve-labels">
+          <span class="curve-label">6am</span>
+          <span class="curve-label">12pm</span>
+          <span class="curve-label">6pm</span>
+          <span class="curve-label">12am</span>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:8px;">
+          <div style="display:flex; gap:6px; align-items:center;"><div style="width:16px; height:2px; background:var(--teal);"></div><div style="font-size:11px; color:rgba(255,255,255,0.5);">Healthy rhythm</div></div>
+          <div style="display:flex; gap:6px; align-items:center;"><div style="width:16px; height:2px; background:rgba(240,80,58,0.6);"></div><div style="font-size:11px; color:rgba(255,255,255,0.5);">Chronic stress pattern</div></div>
+        </div>
+        <div class="curve-insight">With chronic stress, cortisol stays elevated all day and doesn't drop at night. This is why you feel tired but wired — exhausted but unable to sleep.</div>
+      </div>
+      <div class="card-dark">
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Healthy:</strong> peaks at 6–8am (wakes you up), drops steadily, very low by 10pm (lets you sleep).</div></div>
+        <div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Chronic stress:</strong> flat-high all day. Never fully drops. Disrupts sleep, metabolism, immune function, and mood simultaneously.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: BODY MAP -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">6 systems affected.<br>Tap each to understand.</div>
+      <div class="s-sub">This is what sustained cortisol does — system by system.</div>
+      <div class="body-map">
+        <div class="body-map-title">Your body under chronic stress</div>
+        <div class="body-systems">
+          <div class="body-system" style="background:rgba(240,80,58,0.1);" onclick="toggleSystem(0)" id="sys0">
+            <div class="system-icon">🧠</div>
+            <div class="system-info">
+              <div class="system-name" style="color:#FCA5A5;">Brain & mood</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Memory, focus, anxiety</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">Cortisol shrinks the hippocampus (memory) and enlarges the amygdala (fear). Result: foggy thinking, hypervigilance, difficulty concentrating. The brain literally rewires toward threat detection.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+          <div class="body-system" style="background:rgba(245,166,35,0.1);" onclick="toggleSystem(1)" id="sys1">
+            <div class="system-icon">❤️</div>
+            <div class="system-info">
+              <div class="system-name" style="color:#FCD34D;">Heart & circulation</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Blood pressure, heart rate</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">Chronic cortisol keeps blood pressure elevated and heart rate variability low. Over years, this significantly increases cardiovascular risk — independent of diet or exercise.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+          <div class="body-system" style="background:rgba(124,58,237,0.1);" onclick="toggleSystem(2)" id="sys2">
+            <div class="system-icon">🌙</div>
+            <div class="system-info">
+              <div class="system-name" style="color:#A5B4FC;">Sleep architecture</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Deep sleep, melatonin</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">High evening cortisol blocks melatonin production and suppresses deep sleep (N3). You sleep, but don't recover. Growth hormone — released only during deep sleep — can't do its repair work.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+          <div class="body-system" style="background:rgba(245,166,35,0.1);" onclick="toggleSystem(3)" id="sys3">
+            <div class="system-icon">🍽️</div>
+            <div class="system-info">
+              <div class="system-name" style="color:var(--amber);">Metabolism & weight</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Blood sugar, fat storage</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">Cortisol raises blood glucose and promotes abdominal fat storage. It also increases cravings for sugar and processed food — your brain seeking quick fuel for a "threat" that never ends.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+          <div class="body-system" style="background:rgba(29,184,126,0.1);" onclick="toggleSystem(4)" id="sys4">
+            <div class="system-icon">🛡️</div>
+            <div class="system-info">
+              <div class="system-name" style="color:var(--green);">Immune system</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Inflammation, infections</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">Short-term cortisol is anti-inflammatory. Chronic cortisol does the opposite — it dysregulates the immune response, increasing susceptibility to infections and autoimmune flares.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+          <div class="body-system" style="background:rgba(8,145,178,0.1);" onclick="toggleSystem(5)" id="sys5">
+            <div class="system-icon">🦠</div>
+            <div class="system-info">
+              <div class="system-name" style="color:var(--teal);">Gut microbiome</div>
+              <div class="system-short" style="color:rgba(255,255,255,0.5);">Digestion, gut-brain axis</div>
+              <div class="system-detail" style="color:rgba(255,255,255,0.7);">Stress shifts the gut microbiome toward inflammatory bacteria. The gut-brain axis runs both ways — a stressed gut sends distress signals to the brain, amplifying anxiety and mood disruption.</div>
+            </div>
+            <div class="system-arrow">▼</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: WHAT YOU CAN DO -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">5 habits that directly<br>lower cortisol.</div>
+      <div class="s-sub">Each one is in your Sérénité programme. Each one works.</div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);">
+        <div class="tip-title" style="color:var(--teal-d);">1. Cardiac coherence — 5 min × 3/day</div>
+        <div class="tip-text">Drops cortisol measurably within 90 seconds. Effect accumulates over days. You did this in Module S02.</div>
+      </div>
+      <div class="tip-card" style="background:var(--green-l); border-color:var(--green);">
+        <div class="tip-title" style="color:#0F5132;">2. Morning movement — 20 min</div>
+        <div class="tip-text">Morning exercise uses up the cortisol spike productively. Without movement, the morning cortisol peak has nowhere to go — it just stays elevated.</div>
+      </div>
+      <div class="tip-card" style="background:#F5F3FF; border-color:var(--purple);">
+        <div class="tip-title" style="color:#5B21B6;">3. Fixed sleep schedule — same time 7 days</div>
+        <div class="tip-text">The single most effective cortisol regulator. A consistent wake time is more powerful than any supplement or medication for resetting the HPA axis.</div>
+      </div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);">
+        <div class="tip-title" style="color:#78350F;">4. Reduce caffeine after 2pm</div>
+        <div class="tip-text">Caffeine stimulates cortisol release. After 2pm, it stacks on top of the afternoon cortisol that's already slow to drop — keeping you alert when you need to wind down.</div>
+      </div>
+      <div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);">
+        <div class="tip-title" style="color:#991B1B;">5. Cold exposure — 30 sec shower</div>
+        <div class="tip-text">Paradoxically, brief cold stress normalises the HPA axis over time — your cortisol response becomes more precise, less chronic. Module S11 covers this in detail.</div>
+      </div>
+    </div>
+
+    <!-- 4: FINAL -->
+    <div class="slide slide-final" data-index="4">
+      <div class="final-badge">SÉRÉNITÉ · Your biology, your levers</div>
+      <div class="final-title">You now know<br>what's happening.<br>And what stops it.</div>
+      <div class="final-body">Cortisol isn't your enemy. It's a molecule doing its job — in a context it wasn't designed for. Every module in Sérénité targets a specific point in the cortisol loop.</div>
+      <div class="interrupt-list">
+        <div class="interrupt-item">
+          <div class="interrupt-icon">🫁</div>
+          <div class="interrupt-text"><strong>S02:</strong> Breathing interrupts the cortisol spike in real time.</div>
+        </div>
+        <div class="interrupt-item">
+          <div class="interrupt-icon">🌅</div>
+          <div class="interrupt-text"><strong>S04:</strong> Morning routine sets the cortisol rhythm for the day.</div>
+        </div>
+        <div class="interrupt-item">
+          <div class="interrupt-icon">🏃</div>
+          <div class="interrupt-text"><strong>S05:</strong> Movement burns excess cortisol productively.</div>
+        </div>
+        <div class="interrupt-item">
+          <div class="interrupt-icon">🌙</div>
+          <div class="interrupt-text"><strong>S08:</strong> Sleep protocol resets the HPA axis overnight.</div>
+        </div>
+      </div>
+      <div class="card-dark" style="background:var(--navy2);">
+        <div class="item-text" style="color:rgba(255,255,255,0.5); font-size:12px; line-height:1.6;">Next module → <strong style="color:white;">S04 — The 10-minute morning anchor.</strong> The single most impactful daily habit for cortisol regulation.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
+    <span class="nav-counter" id="counter">1 / 5</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+var current=0, total=5;
+var slides=document.querySelectorAll('.slide');
+var dots=[], bar=document.getElementById('progressBar');
+for(var i=0;i<total;i++){
+  var d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  bar.appendChild(d); dots.push(d);
+}
+function updateDots(){ dots.forEach(function(d,i){ d.className='dot'+(i===current?' active':i<current?' done':''); }); }
+function getClass(idx){
+  if(idx===0) return 'slide slide-cover';
+  if(idx===3) return 'slide slide-white';
+  if(idx===4) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir){
+  var next=current+dir;
+  if(next<0||next>=total) return;
+  slides.forEach(function(s){if(!s.classList.contains('active'))s.className=getClass(parseInt(s.dataset.index));});
+  slides[current].className=getClass(current)+(dir>0?' prev':'');
+  current=next; slides[current].classList.add('active');
+  document.getElementById('prevBtn').disabled=current===0;
+  var nb=document.getElementById('nextBtn');
+  nb.textContent=current===total-1?'✓ Done':'Next →';
+  nb.style.background=current===total-1?'var(--green)':'var(--teal)';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  updateDots();
+}
+var sx=0;
+document.getElementById('slides').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+document.getElementById('slides').addEventListener('touchend',function(e){
+  var d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50) navigate(d>0?1:-1);
+},{passive:true});
+
+var expanded=[-1];
+function toggleSystem(idx){
+  var el=document.getElementById('sys'+idx);
+  if(el.classList.contains('expanded')){
+    el.classList.remove('expanded');
+  } else {
+    for(var i=0;i<6;i++) document.getElementById('sys'+i).classList.remove('expanded');
+    el.classList.add('expanded');
+  }
+}
+</script>
+</body>
+</html>
