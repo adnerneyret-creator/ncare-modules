@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bienvenue parmi les Pionnières · Selinoa</title>
+<style>
+  :root{
+    --gold:#8C6A43; --gold-dark:#745735; --cream:#F2EBE0; --surface:#FBF7F1;
+    --ink:#3A332B; --body:#4A4038; --muted:#6f6357; --soft:#9a8c7a; --line:#E0D2BD;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--cream);color:var(--body);overflow-x:hidden;overflow-wrap:break-word;
+    font-family:Arial,Helvetica,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 20px;}
+  .serif{font-family:Georgia,'Times New Roman',serif;}
+  h1,h2,h3{font-family:Georgia,'Times New Roman',serif;color:var(--ink);margin:0;font-weight:bold;}
+  p{margin:0 0 16px 0;font-size:16px;}
+  a{color:var(--gold);}
+
+  /* Hero */
+  .hero{text-align:center;padding:54px 20px 40px;}
+  .mark{font-family:Georgia,serif;font-size:32px;letter-spacing:8px;color:var(--gold);font-weight:bold;}
+  .mark-sub{font-size:11px;letter-spacing:1.5px;color:var(--soft);margin-top:10px;text-transform:uppercase;}
+  .eyebrow{font-size:12px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin:34px 0 14px;}
+  .hero h1{font-size:38px;line-height:1.15;}
+  .hero .lead{font-size:18px;color:var(--muted);max-width:520px;margin:18px auto 0;}
+  .rule{width:54px;height:2px;background:var(--gold);border:0;margin:30px auto;}
+
+  /* Section */
+  section{padding:14px 0 28px;}
+  .kicker{font-size:12px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+  h2{font-size:27px;line-height:1.2;margin-bottom:16px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:30px 30px;margin:6px 0 8px;}
+
+  /* Welcome card */
+  .welcome p{font-size:16.5px;}
+  .sign{margin-top:18px;font-style:italic;color:var(--muted);}
+
+  /* Steps */
+  .step{display:flex;gap:18px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line);}
+  .step:last-child{border-bottom:0;}
+  .num{flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:var(--gold);color:#FBF7F1;
+    font-family:Georgia,serif;font-size:18px;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .step h3{font-size:18px;margin-bottom:5px;}
+  .step p{margin:0;font-size:15.5px;color:var(--body);}
+
+  /* Team */
+  .member{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px 26px;margin-bottom:14px;}
+  .member .role{font-size:12px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
+  .member h3{font-size:20px;margin-bottom:8px;}
+  .member p{margin:0;font-size:15.5px;color:var(--body);}
+  .more{font-size:15px;color:var(--muted);font-style:italic;margin-top:4px;}
+
+  /* Place */
+  .place{background:var(--gold);color:#FBF7F1;border-radius:10px;padding:34px 30px;text-align:center;}
+  .place h2{color:#FBF7F1;}
+  .place p{color:#F3E9DC;font-size:16.5px;margin:0 auto;max-width:520px;}
+
+  /* App steps */
+  .appstep{display:flex;gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px dashed var(--line);}
+  .appstep:last-child{border-bottom:0;}
+  .dot{flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:var(--gold);transform:translateY(6px);}
+  .appstep p{margin:0;font-size:15.5px;}
+  .help{background:#F4ECDF;border-radius:8px;padding:14px 18px;margin-top:14px;font-size:14.5px;color:var(--muted);}
+
+  /* Closing */
+  .closing{text-align:center;padding:8px 0 6px;}
+  .closing .big{font-family:Georgia,serif;font-size:23px;color:var(--gold);line-height:1.35;margin:0 auto 6px;max-width:520px;}
+
+  /* Footer */
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 0 50px;text-align:center;}
+  footer p{font-size:12.5px;color:var(--soft);line-height:1.6;margin:0 0 8px;overflow-wrap:anywhere;}
+
+  @media (max-width:600px){
+    .wrap{padding:0 16px;}
+    .hero{padding:42px 16px 32px;}
+    .hero h1{font-size:28px;}
+    .hero .lead{font-size:16.5px;}
+    h2{font-size:22px;}
+    .card,.place{padding:24px 20px;} .member{padding:20px 18px;}
+    .mark{font-size:26px;letter-spacing:5px;}
+    p{font-size:15.5px;}
+    .num{flex:0 0 34px;width:34px;height:34px;font-size:16px;}
+    .step{gap:14px;}
+  }
+  @media (max-width:380px){
+    .hero h1{font-size:25px;}
+    .mark{font-size:23px;letter-spacing:3px;}
+    .mark-sub{letter-spacing:1px;font-size:10.5px;}
+    h2{font-size:20px;}
+    .closing .big{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="mark">SELINOA</div>
+    <div class="mark-sub">Médecine fonctionnelle&nbsp;·&nbsp;Santé féminine</div>
+    <div class="eyebrow">Programme Les Pionnières</div>
+    <h1>Bienvenue parmi<br>les Pionnières.</h1>
+    <p class="lead">Vous faites désormais partie des premières femmes à vivre une autre façon de prendre soin de soi. Voici ce qui vous attend, et celles et ceux qui vous accompagnent.</p>
+    <hr class="rule">
+  </div>
+
+  <div class="wrap">
+
+    <!-- WELCOME -->
+    <section>
+      <div class="card welcome">
+        <div class="kicker">Un mot pour commencer</div>
+        <p>Si vous êtes ici, c'est que quelque chose en vous a dit oui. Oui à être enfin écoutée, regardée dans votre ensemble, accompagnée plutôt que renvoyée chez vous avec un «&nbsp;tout va bien&nbsp;».</p>
+        <p>Vous n'êtes pas un dossier de plus. Vous êtes une Pionnière, et ce que nous construisons, nous le construisons avec vous.</p>
+        <p>Nous ne vous promettons pas de miracle. Nous nous engageons sur quelque chose de plus solide : de l'attention, de la rigueur, et un vrai partenariat, à votre rythme.</p>
+        <p class="sign">Dr Adner Neyret et l'équipe Selinoa</p>
+      </div>
+    </section>
+
+    <!-- PARCOURS -->
+    <section>
+      <div class="kicker">Votre parcours</div>
+      <h2>Six mois, pas à pas.</h2>
+      <p>Votre programme s'étend sur six mois. Voici les grandes étapes, pensées pour avancer sans précipitation.</p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Le bilan initial</h3>
+          <p>Tout commence par une vraie rencontre : un bilan avec votre Care Manager, puis une consultation médicale, pour comprendre votre histoire dans son ensemble, et non symptôme par symptôme.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Votre projet de soin personnalisé</h3>
+          <p>À partir de là, nous traçons ensemble votre feuille de route : vos priorités, les pistes à explorer, les axes de travail. Un plan qui vous ressemble, et qui évolue avec vous.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>L'accompagnement</h3>
+          <p>Au fil des semaines : le suivi de votre Care Manager, les séances de mouvement en groupe, et la coordination de votre parcours. Vous n'avancez jamais seule.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>Le suivi et la mesure</h3>
+          <p>Grâce à l'application et à des questionnaires réguliers, nous suivons ensemble votre évolution, concrètement, pour ajuster ce qui doit l'être.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <h3>Les points d'étape</h3>
+          <p>À mi-parcours puis au terme des six mois, nous faisons le point sur le chemin parcouru, et sur la suite.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉQUIPE -->
+    <section>
+      <div class="kicker">Votre équipe</div>
+      <h2>Des personnes, pas un guichet.</h2>
+      <p>Vous n'êtes pas accompagnée par un service anonyme, mais par des personnes qui travaillent ensemble autour de vous.</p>
+
+      <div class="member">
+        <div class="role">Médecin référent</div>
+        <h3>Dr Adner Neyret</h3>
+        <p>Le regard médical qui relie les points, là où chaque spécialiste n'a vu qu'une pièce. Votre santé, regardée comme un tout.</p>
+      </div>
+      <div class="member">
+        <div class="role">Care Manager</div>
+        <h3>Aurélie Briane</h3>
+        <p>Votre interlocutrice privilégiée, du premier jour au dernier. Celle qui vous écoute, organise votre parcours et relie tout autour de vous.</p>
+      </div>
+      <div class="member">
+        <div class="role">Mouvement et physiothérapie</div>
+        <h3>Camille Scherrer et Thibaud Serve</h3>
+        <p>Pour bouger autrement : un mouvement pensé comme un soin, à votre mesure, et jamais comme une performance.</p>
+      </div>
+      <div class="member">
+        <div class="role">Do-In et shiatsu&nbsp;·&nbsp;Vers l'équilibre</div>
+        <h3>Maria Larsson</h3>
+        <p>Le toucher et le souffle au service du relâchement : des temps pour dénouer le corps, inviter au calme et revenir à soi.</p>
+      </div>
+      <p class="more">Et, selon vos besoins, les praticien·nes du centre qui viennent compléter votre accompagnement.</p>
+    </section>
+
+    <!-- LIEU -->
+    <section>
+      <div class="kicker">Votre lieu</div>
+      <h2>Où se passe quoi.</h2>
+      <p>Le temps que votre centre se construise, votre parcours se répartit sur quelques lieux, chacun pensé pour ce qui s'y vit.</p>
+
+      <div class="member">
+        <div class="role">Consultations médicales</div>
+        <h3>Cabinet du Dr Adner Neyret</h3>
+        <p>Rue Senedu-Gebru 1, 1022 Chavannes-près-Renens.</p>
+      </div>
+      <div class="member">
+        <div class="role">Prélèvements et prises de sang</div>
+        <h3>Au laboratoire, à votre convenance</h3>
+        <p>Au choix, deux centres de prélèvement à Lausanne : Place Saint-François 5 (1003), en plein centre, ou Avenue de Rhodanie 48 (1007), du côté d'Ouchy, à deux pas du lac.</p>
+      </div>
+      <div class="member">
+        <div class="role">Mouvement, Do-In et shiatsu</div>
+        <h3>The Yogarden</h3>
+        <p>Rue de l'Ale 25, 1003 Lausanne. Un studio lumineux au cœur de la ville.</p>
+      </div>
+
+      <div class="place" style="margin-top:8px;">
+        <div class="kicker" style="color:#F0E2CE;">Bientôt</div>
+        <h2>Et bientôt, tout réuni.</h2>
+        <p>Votre centre de 550 m² ouvrira ses portes à Malley : une grande salle de mouvement baignée de lumière, un espace Do-In, un coin détente et tisanerie, et des cabinets où l'on prend le temps. Un endroit où ralentir redevient possible.</p>
+      </div>
+    </section>
+
+    <!-- PREMIERS PAS -->
+    <section>
+      <div class="kicker">Vos premiers pas</div>
+      <h2>Et maintenant ?</h2>
+      <p>Dans les prochains jours, Aurélie reviendra vers vous pour fixer vos premiers rendez-vous et caler vos créneaux. Vous n'avez rien à préparer.</p>
+      <p>Venez comme vous êtes, avec vos questions, vos doutes, votre histoire. Le reste, nous le construirons ensemble.</p>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="closing">
+      <hr class="rule">
+      <p class="big">Bienvenue chez Selinoa. Nous sommes heureux de vous compter parmi les premières.</p>
+      <p style="color:var(--muted);max-width:520px;margin:6px auto 0;">Ce que nous vous devons : vous écouter vraiment, regarder votre santé dans son ensemble, vous accompagner sans vous juger, et vous traiter en partenaire. Pas de promesse miracle. Du soin, du sérieux, et du respect.</p>
+    </section>
+
+    <footer>
+      <p>Selinoa&nbsp;·&nbsp;Dr Adner Neyret, médecin FMH&nbsp;·&nbsp;Lausanne&nbsp;·&nbsp;078 334 88 35&nbsp;·&nbsp;dr.aneyret@hin.ch</p>
+      <p>Document de bienvenue, personnel et confidentiel. Le programme propose un accompagnement et une information à visée éducative, qui ne remplacent pas l'avis de votre médecin.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>
