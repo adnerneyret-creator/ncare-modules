@@ -252,7 +252,7 @@ html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSyst
   <div class="nav">
     <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>←</button>
     <span class="nav-counter" id="counter">1 / 6</span>
-    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Next →</button>
   </div>
 </div>
 
@@ -348,5 +348,54 @@ function heatAction(){
 </style>
 <div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> swipe to navigate <span class="sh-arrow">→</span></div>
 <script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app Pills (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+
+  // Remonte la progression a chaque changement de slide, sans modifier
+  // la fonction navigate() d'origine.
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+
+  // Derniere slide : « Termine ». Ferme la page et revient dans l'app.
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    // Hors de l'app : le navigateur ignore souvent window.close(),
+    // on affiche alors un ecran de fin.
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
 </body>
 </html>
