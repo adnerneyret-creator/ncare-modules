@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F4F7F8">
+<title>Articulations et tendons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+:root {
+  --bg:#F4F7F8; --card:#FFFFFF; --ink:#13293A; --ink2:#3E5363; --ink3:#5F7383; --line:rgba(19,41,58,0.10);
+  --blue:#1F4E6B; --teal:#2B7A76; --teal-d:#1F6560; --mist:#E1EFEE; --terra:#A84A28; --terra-l:#F6E3D9; --sand:#FBF4EA;
+  --serif:'Newsreader', Georgia, 'Times New Roman', serif; --sans:'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; margin:0; }
+body { background:var(--bg); color:var(--ink); font-family:var(--sans); overflow:hidden; padding-top:env(safe-area-inset-top, 0px); }
+.app { height:100%; display:flex; flex-direction:column; max-width:520px; margin:0 auto; }
+.progress { display:flex; gap:4px; padding:12px 16px 8px; }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(19,41,58,0.12); transition:background .3s; }
+.dot.active { background:var(--teal-d); } .dot.done { background:rgba(31,101,96,0.4); }
+.slides { flex:1; position:relative; overflow:hidden; min-height:0; }
+.slide { position:absolute; inset:0; opacity:0; transform:translateX(100%); transition:opacity .3s ease, transform .35s cubic-bezier(.4,0,.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 20px 24px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); } .slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 20px; padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px)); border-top:1px solid var(--line); background:var(--bg); }
+.nav-btn { background:rgba(19,41,58,0.07); border:0; border-radius:22px; min-width:44px; height:44px; color:var(--ink); font:600 15px var(--sans); cursor:pointer; padding:0 18px; display:inline-flex; align-items:center; }
+.nav-btn:disabled { opacity:.3; } .nav-btn.primary { background:var(--teal-d); color:#FFFFFF; } .nav-btn.primary.finish { background:var(--terra); }
+.nav-btn:focus-visible, .chip:focus-visible, summary:focus-visible { outline:2px solid var(--teal); outline-offset:2px; }
+.counter { font-size:12px; color:var(--ink3); font-variant-numeric:tabular-nums; }
+.eyebrow { font-size:11px; font-weight:700; letter-spacing:2px; color:var(--teal-d); text-transform:uppercase; }
+h1, h2 { margin:0; font-family:var(--serif); font-weight:400; letter-spacing:-0.01em; line-height:1.15; text-wrap:balance; }
+h1 { font-size:33px; } h2 { font-size:26px; }
+.sub { font-size:14px; color:var(--ink2); line-height:1.55; margin:0; } .sub b { color:var(--ink); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; box-shadow:0 1px 2px rgba(19,41,58,0.04); }
+.card-title { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--teal-d); margin-bottom:10px; }
+.row { display:flex; gap:10px; align-items:flex-start; } .row + .row { margin-top:10px; }
+.pip { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:7px; background:var(--teal); }
+.txt { font-size:14px; color:var(--ink2); line-height:1.5; min-width:0; } .txt b { color:var(--ink); }
+.cover { justify-content:center; text-align:center; gap:14px;
+  background: radial-gradient(90% 55% at 50% 28%, #DDEFEB 0%, rgba(221,239,235,0) 70%), linear-gradient(180deg, #F2FAF7 0%, var(--bg) 75%); }
+.cover-ic { width:68px; height:68px; margin:0 auto; }
+.stats { display:flex; justify-content:center; gap:12px; margin-top:4px; } .stats .stat { flex:1; max-width:120px; }
+.stat .n { font-family:var(--serif); font-size:26px; white-space:nowrap; color:var(--terra); } .stat .l { font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+.tag-pill { display:inline-block; align-self:center; background:var(--mist); border:1px solid rgba(43,122,118,.3); border-radius:20px; padding:6px 14px; font-size:12px; color:var(--teal-d); font-weight:600; }
+.dur { display:grid; grid-template-columns:1fr auto; gap:6px 10px; align-items:center; } .dur + .dur { margin-top:12px; }
+.dur .lbl { font-size:14px; font-weight:600; grid-column:1 / -1; }
+.dur .bar { height:9px; border-radius:5px; background:#E4EDF3; overflow:hidden; } .dur .bar > i { display:block; height:100%; border-radius:5px; background:var(--teal); }
+.dur .v { font-size:12.5px; color:var(--ink3); min-width:92px; text-align:right; }
+details.case { background:var(--card); border:1px solid var(--line); border-radius:14px; } details.case + details.case { margin-top:8px; }
+details.case summary { list-style:none; cursor:pointer; padding:13px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:700; font-size:15px; min-height:48px; }
+details.case summary::-webkit-details-marker { display:none; }
+details.case summary .chev { color:var(--teal-d); transition:transform .2s; font-size:18px; } details.case[open] summary .chev { transform:rotate(90deg); }
+details.case .body { padding:0 14px 14px; display:flex; flex-direction:column; gap:8px; }
+.flag-line { font-size:13px; color:var(--terra); line-height:1.45; } .flag-line b { color:var(--terra); }
+.check { display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 13px; cursor:pointer; } .check + .check { margin-top:7px; } .check .txt { font-size:13.5px; }
+.check input { width:22px; height:22px; margin:1px 0 0; accent-color:var(--terra); flex-shrink:0; }
+.check:has(input:checked) { border-color:rgba(168,74,40,.5); background:#FBF0EA; } .check .txt { flex:1; }
+.group-lbl { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink3); margin:6px 0 2px; }
+.alert-out { border-radius:14px; padding:13px 15px; font-size:14px; line-height:1.5; background:var(--mist); border:1px solid rgba(43,122,118,.35); }
+#flagOut { position:sticky; bottom:-24px; z-index:2; box-shadow:0 -6px 18px rgba(244,247,248,0.95), 0 2px 8px rgba(19,41,58,0.08); }
+.alert-out b { display:block; margin-bottom:3px; }
+.alert-out.rdv { background:var(--terra-l); border-color:rgba(168,74,40,.45); }
+.alert-out.urgent { background:var(--terra); border-color:var(--terra); color:#FFFFFF; }
+.alert-out a { color:inherit; font-weight:700; }
+.lever { border-radius:14px; padding:13px 15px; border:1px solid var(--line); border-left:4px solid var(--teal); background:var(--card); } .lever + .lever { margin-top:8px; }
+.lever .lt { font-size:15px; font-weight:700; margin-bottom:4px; } .lever .ld { font-size:13.5px; color:var(--ink2); line-height:1.5; } .lever .ev { font-size:11.5px; color:var(--ink3); margin-top:6px; }
+.lab { display:grid; grid-template-columns:auto 1fr; gap:8px 12px; font-size:13.5px; } .lab .k { font-weight:700; color:var(--teal-d); white-space:nowrap; } .lab .v { color:var(--ink2); line-height:1.45; min-width:0; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { min-height:44px; padding:0 14px; border-radius:22px; border:1px solid rgba(19,41,58,0.18); background:var(--card); color:var(--ink); font:600 14px var(--sans); cursor:pointer; }
+.chip[aria-pressed=true] { background:var(--teal-d); border-color:var(--teal-d); color:#FFFFFF; }
+.follow { display:flex; gap:12px; align-items:center; background:var(--mist); border-radius:16px; padding:14px; }
+.follow .ic { flex-shrink:0; width:44px; height:44px; border-radius:22px; background:var(--card); display:grid; place-items:center; color:var(--teal-d); font-weight:800; }
+.numbers { display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:13.5px; align-items:baseline; }
+.numbers .k { font-family:var(--serif); font-size:20px; color:var(--terra); } .numbers .v { color:var(--ink2); line-height:1.4; }
+.end { position:fixed; inset:0; z-index:50; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:32px; background:var(--bg); }
+.end .ok { width:64px; height:64px; border-radius:32px; background:var(--mist); color:var(--teal-d); display:grid; place-items:center; font-size:30px; font-weight:800; }
+.end button { min-height:48px; border-radius:24px; border:0; background:var(--teal-d); color:#FFFFFF; font:600 15px var(--sans); padding:0 22px; cursor:pointer; }
+.disclaimer { font-size:11.5px; color:var(--ink3); line-height:1.5; text-align:center; margin-top:auto; }
+.sources { font-size:11.5px; color:var(--ink3); line-height:1.5; border-top:1px solid var(--line); padding-top:10px; }
+</style>
+</head>
+<body data-fiche="articulations">
+<div class="end" id="endScreen" role="dialog" aria-label="Fiche terminée"><div class="ok">✓</div><h2>Fiche terminée</h2>
+<p class="sub">Vous pouvez fermer cette page. Si un signe d’alerte apparaît, contactez le cabinet.</p>
+<button type="button" id="restart">Revoir la fiche</button></div>
+<div class="app">
+  <div class="progress" id="progress"></div>
+  <div class="slides" id="slides">
+    <section class="slide cover active" data-i="0">
+<span class="eyebrow">Continuum · Douleurs du dos et des articulations</span>
+<svg class="cover-ic" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="30" fill="#FFFFFF" stroke="#9EC9C5" stroke-width="3"/><path d="M36 22v28M22 36h28" stroke="#1F6560" stroke-width="5" stroke-linecap="round"/></svg>
+<h1>Genou, épaule,<br>cheville, arthrose.</h1>
+<p class="sub">Entorse, tendinite, arthrose : des douleurs fréquentes, qui répondent bien au mouvement adapté. Voici comment les soulager, et quand consulter.</p>
+<span class="tag-pill">7 écrans · 5 minutes</span>
+<div class="stats"><div class="stat"><div class="n">Bouger</div><div class="l">traitement n°1<br>de l’arthrose</div></div><div class="stat"><div class="n">1–3 j</div><div class="l">de protection<br>après une entorse</div></div><div class="stat"><div class="n">Chaud</div><div class="l">rouge, gonflé<br>= consulter</div></div></div>
+<p class="disclaimer">Information générale. Ne remplace pas une consultation.</p>
+    </section>
+    <section class="slide" data-i="1">
+<span class="eyebrow">Comprendre · la base commune</span><h2>Le mouvement, bien dosé.</h2><p class="sub">Ce qui vaut pour la plupart des douleurs des articulations et des tendons.</p><div class="card"><div class="row"><span class="pip"></span><div class="txt"><b>Les articulations et les tendons aiment le mouvement dosé</b> : trop de repos les enraidit, trop d’effort les irrite.</div></div><div class="row"><span class="pip"></span><div class="txt"><b>L’arthrose n’est pas une fatalité</b> : l’activité physique adaptée, et la perte de poids si nécessaire, réduisent la douleur.</div></div><div class="row"><span class="pip"></span><div class="txt"><b>Une entorse ou une tendinite guérit en quelques semaines</b> si l’on reprend progressivement.</div></div><div class="row"><span class="pip"></span><div class="txt"><b>Une radio n’est pas toujours nécessaire</b> : le médecin la demande selon l’examen, par exemple si vous ne pouvez pas poser le pied après une entorse.</div></div></div>
+    </section>
+    <section class="slide" data-i="2">
+<span class="eyebrow">Comprendre · votre cas</span><h2>Quel est votre cas ?</h2><p class="sub">Touchez votre situation.</p><details class="case"><summary>Entorse de la cheville<span class="chev">›</span></summary><div class="body"><div class="txt">Les premiers jours : protéger, surélever, comprimer légèrement. Puis reprendre l’appui et le mouvement dès que la douleur le permet : la reprise précoce aide à guérir.</div><div class="flag-line"><b>À surveiller :</b> impossible de faire quatre pas, douleur vive sur l’os, déformation.</div></div></details><details class="case"><summary>Arthrose (genou, hanche, main)<span class="chev">›</span></summary><div class="body"><div class="txt">Douleur à l’effort, raideur le matin de moins d’une demi-heure. Exercices réguliers, marche, vélo, natation, et perte de poids si besoin. Pour le genou, un gel anti-inflammatoire est un bon premier traitement.</div><div class="flag-line"><b>À surveiller :</b> articulation soudain rouge, chaude et gonflée.</div></div></details><details class="case"><summary>Épaule douloureuse<span class="chev">›</span></summary><div class="body"><div class="txt">Souvent les tendons. Gardez des mouvements doux et évitez seulement les gestes qui réveillent la douleur ; la physiothérapie aide.</div><div class="flag-line"><b>À surveiller :</b> impossible de lever le bras après une chute, ou douleur avec essoufflement ou dans la poitrine.</div></div></details><details class="case"><summary>Tendinite (coude, talon, poignet)<span class="chev">›</span></summary><div class="body"><div class="txt">Réduisez l’effort qui l’a déclenchée sans arrêter de bouger, puis renforcez progressivement.</div><div class="flag-line"><b>À surveiller :</b> claquement avec douleur brutale au talon (tendon d’Achille).</div></div></details><details class="case"><summary>Goutte<span class="chev">›</span></summary><div class="body"><div class="txt">Crise brutale, souvent la nuit : gros orteil rouge, chaud, très douloureux. Elle se traite bien, consultez rapidement.</div><div class="flag-line"><b>À surveiller :</b> fièvre associée.</div></div></details>
+    </section>
+    <section class="slide" data-i="3">
+<span class="eyebrow">Repérer</span><h2>Cochez ce qui vous concerne.</h2><p class="sub">Ces signes ne veulent pas forcément dire que c’est grave. Mais ils changent le délai.</p><div id="flags"><div class="group-lbl">Urgent</div><label class="check"><input type="checkbox" data-level="urgent"><div class="txt">Une articulation <b>rouge, chaude, gonflée, avec de la fièvre</b></div></label><label class="check"><input type="checkbox" data-level="urgent"><div class="txt"><b>Déformation</b> après un choc, ou os qui semble déplacé</div></label><label class="check"><input type="checkbox" data-level="urgent"><div class="txt">Membre <b>froid, pâle ou insensible</b> après un traumatisme</div></label><div class="group-lbl">À voir rapidement</div><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Impossible de <b>poser le pied</b> ou de faire quatre pas après une entorse</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Articulation <b>rouge, chaude et gonflée</b>, sans fièvre</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Genou qui se <b>bloque</b> ou qui se <b>dérobe</b></div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Raideur le matin de <b>plus d’une heure</b>, ou plusieurs articulations gonflées</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Douleur qui ne s’améliore pas après <b>4 à 6 semaines</b></div></label></div><div class="alert-out" id="flagOut" role="status" aria-live="polite"><b>Aucun signe coché</b>Les écrans suivants vous disent comment vous soigner à la maison. Si ça ne s’améliore pas dans les délais habituels, prenez rendez-vous.</div><div class="card"><div class="card-title">Les bons numéros</div><div class="numbers"><span class="k">144</span><span class="v">Urgence vitale : difficulté à respirer, malaise, confusion.</span><span class="k">0848 133 133</span><span class="v">Centrale des médecins de garde du canton de Vaud, 24 h sur 24, quand le cabinet est fermé.</span></div></div>
+    </section>
+    <section class="slide" data-i="4">
+<span class="eyebrow">Agir</span><h2>Ce qui aide vraiment.</h2><div class="lever" style="border-left-color:var(--teal)"><div class="lt">Bouger juste ce qu’il faut</div><div class="ld">Gardez l’articulation en mouvement sans forcer sur ce qui fait mal. Une douleur modérée pendant l’effort est acceptable si elle passe le lendemain.</div></div><div class="lever" style="border-left-color:var(--blue)"><div class="lt">Soulager</div><div class="ld">Froid les premiers jours d’une entorse si ça soulage, chaleur pour l’arthrose et les raideurs. Pour le genou arthrosique, un gel anti-inflammatoire. Le paracétamol a un effet limité sur l’arthrose.</div><div class="ev">NICE NG226 (2022) : exercice pour tous, gel anti-inflammatoire pour le genou, pas de paracétamol en routine.</div></div><div class="lever" style="border-left-color:var(--terra)"><div class="lt">Renforcer</div><div class="ld">Des exercices réguliers, guidés au début par un physiothérapeute, réduisent la douleur et protègent l’articulation. Perdre du poids soulage nettement genoux et hanches.</div></div><div class="card"><div class="card-title">Ce qui n’a pas fait ses preuves</div><div class="txt">La glucosamine et les injections d’acide hyaluronique pour l’arthrose, selon les recommandations britanniques.</div></div>
+    </section>
+    <section class="slide" data-i="5">
+<span class="eyebrow">Préparer la consultation</span><h2>Ce qu’on fera probablement ensemble.</h2><p class="sub">Savoir à quoi s’attendre rend la consultation plus utile, et plus courte.</p><div class="card"><div class="card-title">Au cabinet</div><div class="lab"><span class="k">Examen</span><span class="v">L’articulation, sa mobilité, sa stabilité, comparée à l’autre côté.</span><span class="k">Imagerie</span><span class="v">Une radio si l’examen la justifie, parfois une échographie.</span><span class="k">Traitement</span><span class="v">Conseils d’exercices, gel ou comprimés, physiothérapie, parfois une infiltration.</span></div></div><div class="card"><div class="card-title">Ce que vous pouvez apporter</div><div class="row"><span class="pip"></span><div class="txt"><b>Comment c’est arrivé</b>, et depuis quand.</div></div><div class="row"><span class="pip"></span><div class="txt">Ce qui <b>soulage</b> et ce qui <b>aggrave</b>.</div></div><div class="row"><span class="pip"></span><div class="txt">Vos <b>activités et sports</b>.</div></div><div class="row"><span class="pip"></span><div class="txt">Les <b>médicaments</b> déjà pris.</div></div></div>
+    </section>
+    <section class="slide" data-i="6">
+<span class="eyebrow">Votre premier pas</span><h2>Aujourd’hui, je…</h2><p class="sub">Touchez ce que vous faites dès maintenant.</p><div class="chips"><button type="button" class="chip" aria-pressed="false">Bouger un peu chaque jour</button><button type="button" class="chip" aria-pressed="false">Surélever ma cheville</button><button type="button" class="chip" aria-pressed="false">Gel anti-inflammatoire (genou)</button><button type="button" class="chip" aria-pressed="false">Exercices de renforcement</button><button type="button" class="chip" aria-pressed="false">Marche, vélo ou natation</button><button type="button" class="chip" aria-pressed="false">Perdre un peu de poids</button></div><div class="follow"><div class="ic">J+7</div><div class="txt">Dans une semaine, l’application vous demandera <b>comment vous allez</b>. Si ce n’est pas mieux, ou si un signe d’alerte apparaît, on se voit.</div></div><div class="sources"><b>Sources</b> · NICE NG226, arthrose (2022) ; Dubois et Esculier, Br J Sports Med 2020 (prise en charge des entorses et blessures) ; Stiell et al., Ann Emerg Med 1992 (règles d’Ottawa pour la cheville).</div><p class="disclaimer">Information générale, validée par le Dr Adner Neyret, médecin généraliste. Ne remplace pas une consultation. En cas de signe d’alerte, contactez le cabinet.</p>
+    </section>
+  </div>
+  <div class="nav">
+    <button class="nav-btn" id="prev" onclick="step(-1)" disabled aria-label="Précédent">←</button>
+    <span class="counter" id="counter">1 / 7</span>
+    <button class="nav-btn primary" id="next" onclick="step(1)">Suivant →</button>
+  </div>
+</div>
+<script type="application/json" id="msgs">{"urgent": "<b>Ne laissez pas attendre.</b>Si la situation vous semble grave (difficulté à respirer, malaise, confusion), appelez le 144. Sinon, appelez tout de suite le cabinet ou, s’il est fermé, les médecins de garde au 0848 133 133.", "rdv": "<b>Contactez le cabinet aujourd’hui ou demain.</b>Ce n’est pas forcément grave, mais on ne laisse pas traîner. La nuit et le week-end : 0848 133 133 (médecins de garde, Vaud).", "none": "<b>Aucun signe coché</b>Les écrans suivants vous disent comment vous soigner à la maison. Si ça ne s’améliore pas dans les délais habituels, prenez rendez-vous."}</script>
+<script>
+var cur = 0, slides = document.querySelectorAll('.slide'), total = slides.length;
+var bar = document.getElementById('progress'), dots = [];
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot'; bar.appendChild(d); dots.push(d); }
+function render() {
+  slides.forEach(function (s, i) { s.classList.toggle('active', i === cur); s.classList.toggle('prev', i < cur); });
+  dots.forEach(function (d, i) { d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' done' : ''); });
+  document.getElementById('prev').disabled = cur === 0;
+  var n = document.getElementById('next');
+  n.textContent = cur === total - 1 ? '✓ Terminé' : 'Suivant →';
+  n.classList.toggle('finish', cur === total - 1);
+  document.getElementById('counter').textContent = (cur + 1) + ' / ' + total;
+  slides[cur].scrollTop = 0;
+}
+function post(p) { try { if (window.NcareBridge && window.NcareBridge.postMessage) { window.NcareBridge.postMessage(JSON.stringify(p)); return true; } } catch (e) {} return false; }
+function finish() {
+  /* Dans l'application : on prévient l'app, qui ferme la fiche. */
+  if (post({event:'completed', fiche:document.body.getAttribute('data-fiche')})) return;
+  /* Ouverte depuis la bibliothèque : on y retourne. */
+  if (/[?&]from=bibliotheque/.test(location.search) || (document.referrer && /bibliotheque\.html/.test(document.referrer))) { location.href = 'bibliotheque.html'; return; }
+  /* Ouverte seule : écran de fin, sans changer de page. */
+  document.getElementById('endScreen').style.display = 'flex';
+}
+function step(dir) { var n = cur + dir; if (n < 0) return; if (n >= total) { finish(); return; } cur = n; render(); }
+document.getElementById('restart').addEventListener('click', function () { document.getElementById('endScreen').style.display = 'none'; cur = 0; render(); });
+var sx = 0, sy = 0, ok = true, el = document.getElementById('slides');
+el.addEventListener('touchstart', function (e) { ok = !(e.target.closest && e.target.closest('input,textarea,summary,.chip,.check')); sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+el.addEventListener('touchend', function (e) { if (!ok) return; var dx = sx - e.changedTouches[0].clientX, dy = sy - e.changedTouches[0].clientY; if (Math.abs(dx) > 60 && Math.abs(dy) < 80) step(dx > 0 ? 1 : -1); }, { passive: true });
+document.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+document.querySelectorAll('.chip').forEach(function (c) { c.addEventListener('click', function () { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }); });
+var out = document.getElementById('flagOut'), MSG = JSON.parse(document.getElementById('msgs').textContent);
+document.getElementById('flags').addEventListener('change', function () {
+  var urg = document.querySelectorAll('#flags input[data-level=urgent]:checked').length;
+  var n = document.querySelectorAll('#flags input:checked').length;
+  if (urg) { out.className = 'alert-out urgent'; out.innerHTML = MSG.urgent; }
+  else if (n) { out.className = 'alert-out rdv'; out.innerHTML = MSG.rdv; }
+  else { out.className = 'alert-out'; out.innerHTML = MSG.none; }
+});
+render();
+</script>
+<script></script>
+</body>
+</html>

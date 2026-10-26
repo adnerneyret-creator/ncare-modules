@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F4F7F8">
+<title>Mon moral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+:root {
+  --bg:#F4F7F8; --card:#FFFFFF; --ink:#13293A; --ink2:#3E5363; --ink3:#5F7383; --line:rgba(19,41,58,0.10);
+  --blue:#1F4E6B; --teal:#2B7A76; --teal-d:#1F6560; --mist:#E1EFEE; --terra:#A84A28; --terra-l:#F6E3D9; --sand:#FBF4EA;
+  --serif:'Newsreader', Georgia, 'Times New Roman', serif; --sans:'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; margin:0; }
+body { background:var(--bg); color:var(--ink); font-family:var(--sans); overflow:hidden; padding-top:env(safe-area-inset-top, 0px); }
+.app { height:100%; display:flex; flex-direction:column; max-width:520px; margin:0 auto; }
+.progress { display:flex; gap:4px; padding:12px 16px 8px; }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(19,41,58,0.12); transition:background .3s; }
+.dot.active { background:var(--teal-d); } .dot.done { background:rgba(31,101,96,0.4); }
+.slides { flex:1; position:relative; overflow:hidden; min-height:0; }
+.slide { position:absolute; inset:0; opacity:0; transform:translateX(100%); transition:opacity .3s ease, transform .35s cubic-bezier(.4,0,.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 20px 24px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); } .slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 20px; padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px)); border-top:1px solid var(--line); background:var(--bg); }
+.nav-btn { background:rgba(19,41,58,0.07); border:0; border-radius:22px; min-width:44px; height:44px; color:var(--ink); font:600 15px var(--sans); cursor:pointer; padding:0 18px; display:inline-flex; align-items:center; }
+.nav-btn:disabled { opacity:.3; } .nav-btn.primary { background:var(--teal-d); color:#FFFFFF; } .nav-btn.primary.finish { background:var(--terra); }
+.nav-btn:focus-visible, .chip:focus-visible, summary:focus-visible { outline:2px solid var(--teal); outline-offset:2px; }
+.counter { font-size:12px; color:var(--ink3); font-variant-numeric:tabular-nums; }
+.eyebrow { font-size:11px; font-weight:700; letter-spacing:2px; color:var(--teal-d); text-transform:uppercase; }
+h1, h2 { margin:0; font-family:var(--serif); font-weight:400; letter-spacing:-0.01em; line-height:1.15; text-wrap:balance; }
+h1 { font-size:33px; } h2 { font-size:26px; }
+.sub { font-size:14px; color:var(--ink2); line-height:1.55; margin:0; } .sub b { color:var(--ink); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; box-shadow:0 1px 2px rgba(19,41,58,0.04); }
+.card-title { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--teal-d); margin-bottom:10px; }
+.row { display:flex; gap:10px; align-items:flex-start; } .row + .row { margin-top:10px; }
+.pip { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:7px; background:var(--teal); }
+.txt { font-size:14px; color:var(--ink2); line-height:1.5; min-width:0; } .txt b { color:var(--ink); }
+.cover { justify-content:center; text-align:center; gap:14px;
+  background: radial-gradient(90% 55% at 50% 28%, #DDEFEB 0%, rgba(221,239,235,0) 70%), linear-gradient(180deg, #F2FAF7 0%, var(--bg) 75%); }
+.cover-ic { width:68px; height:68px; margin:0 auto; }
+.stats { display:flex; justify-content:center; gap:12px; margin-top:4px; } .stats .stat { flex:1; max-width:120px; }
+.stat .n { font-family:var(--serif); font-size:26px; white-space:nowrap; color:var(--terra); } .stat .l { font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+.tag-pill { display:inline-block; align-self:center; background:var(--mist); border:1px solid rgba(43,122,118,.3); border-radius:20px; padding:6px 14px; font-size:12px; color:var(--teal-d); font-weight:600; }
+.dur { display:grid; grid-template-columns:1fr auto; gap:6px 10px; align-items:center; } .dur + .dur { margin-top:12px; }
+.dur .lbl { font-size:14px; font-weight:600; grid-column:1 / -1; }
+.dur .bar { height:9px; border-radius:5px; background:#E4EDF3; overflow:hidden; } .dur .bar > i { display:block; height:100%; border-radius:5px; background:var(--teal); }
+.dur .v { font-size:12.5px; color:var(--ink3); min-width:92px; text-align:right; }
+details.case { background:var(--card); border:1px solid var(--line); border-radius:14px; } details.case + details.case { margin-top:8px; }
+details.case summary { list-style:none; cursor:pointer; padding:13px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:700; font-size:15px; min-height:48px; }
+details.case summary::-webkit-details-marker { display:none; }
+details.case summary .chev { color:var(--teal-d); transition:transform .2s; font-size:18px; } details.case[open] summary .chev { transform:rotate(90deg); }
+details.case .body { padding:0 14px 14px; display:flex; flex-direction:column; gap:8px; }
+.flag-line { font-size:13px; color:var(--terra); line-height:1.45; } .flag-line b { color:var(--terra); }
+.check { display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 13px; cursor:pointer; } .check + .check { margin-top:7px; } .check .txt { font-size:13.5px; }
+.check input { width:22px; height:22px; margin:1px 0 0; accent-color:var(--terra); flex-shrink:0; }
+.check:has(input:checked) { border-color:rgba(168,74,40,.5); background:#FBF0EA; } .check .txt { flex:1; }
+.group-lbl { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink3); margin:6px 0 2px; }
+.alert-out { border-radius:14px; padding:13px 15px; font-size:14px; line-height:1.5; background:var(--mist); border:1px solid rgba(43,122,118,.35); }
+#flagOut { position:sticky; bottom:-24px; z-index:2; box-shadow:0 -6px 18px rgba(244,247,248,0.95), 0 2px 8px rgba(19,41,58,0.08); }
+.alert-out b { display:block; margin-bottom:3px; }
+.alert-out.rdv { background:var(--terra-l); border-color:rgba(168,74,40,.45); }
+.alert-out.urgent { background:var(--terra); border-color:var(--terra); color:#FFFFFF; }
+.alert-out a { color:inherit; font-weight:700; }
+.lever { border-radius:14px; padding:13px 15px; border:1px solid var(--line); border-left:4px solid var(--teal); background:var(--card); } .lever + .lever { margin-top:8px; }
+.lever .lt { font-size:15px; font-weight:700; margin-bottom:4px; } .lever .ld { font-size:13.5px; color:var(--ink2); line-height:1.5; } .lever .ev { font-size:11.5px; color:var(--ink3); margin-top:6px; }
+.lab { display:grid; grid-template-columns:auto 1fr; gap:8px 12px; font-size:13.5px; } .lab .k { font-weight:700; color:var(--teal-d); white-space:nowrap; } .lab .v { color:var(--ink2); line-height:1.45; min-width:0; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { min-height:44px; padding:0 14px; border-radius:22px; border:1px solid rgba(19,41,58,0.18); background:var(--card); color:var(--ink); font:600 14px var(--sans); cursor:pointer; }
+.chip[aria-pressed=true] { background:var(--teal-d); border-color:var(--teal-d); color:#FFFFFF; }
+.follow { display:flex; gap:12px; align-items:center; background:var(--mist); border-radius:16px; padding:14px; }
+.follow .ic { flex-shrink:0; width:44px; height:44px; border-radius:22px; background:var(--card); display:grid; place-items:center; color:var(--teal-d); font-weight:800; }
+.numbers { display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:13.5px; align-items:baseline; }
+.numbers .k { font-family:var(--serif); font-size:20px; color:var(--terra); } .numbers .v { color:var(--ink2); line-height:1.4; }
+.end { position:fixed; inset:0; z-index:50; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:32px; background:var(--bg); }
+.end .ok { width:64px; height:64px; border-radius:32px; background:var(--mist); color:var(--teal-d); display:grid; place-items:center; font-size:30px; font-weight:800; }
+.end button { min-height:48px; border-radius:24px; border:0; background:var(--teal-d); color:#FFFFFF; font:600 15px var(--sans); padding:0 22px; cursor:pointer; }
+.disclaimer { font-size:11.5px; color:var(--ink3); line-height:1.5; text-align:center; margin-top:auto; }
+.sources { font-size:11.5px; color:var(--ink3); line-height:1.5; border-top:1px solid var(--line); padding-top:10px; }
+</style>
+</head>
+<body data-fiche="moral">
+<div class="end" id="endScreen" role="dialog" aria-label="Fiche terminée"><div class="ok">✓</div><h2>Fiche terminée</h2>
+<p class="sub">Vous pouvez fermer cette page. Si un signe d’alerte apparaît, contactez le cabinet.</p>
+<button type="button" id="restart">Revoir la fiche</button></div>
+<div class="app">
+  <div class="progress" id="progress"></div>
+  <div class="slides" id="slides">
+    <section class="slide cover active" data-i="0">
+<span class="eyebrow">Continuum · Moral et stress</span>
+<svg class="cover-ic" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="30" fill="#FFFFFF" stroke="#9EC9C5" stroke-width="3"/><path d="M36 22v28M22 36h28" stroke="#1F6560" stroke-width="5" stroke-linecap="round"/></svg>
+<h1>Mon moral.</h1>
+<p class="sub">Tristesse qui dure, plus d’envie, fatigue : la dépression est fréquente, ce n’est pas un manque de volonté, et elle se soigne.</p>
+<span class="tag-pill">7 écrans · 5 minutes</span>
+<div class="stats"><div class="stat"><div class="n">2 sem.</div><div class="l">au moins<br>= seuil</div></div><div class="stat"><div class="n">1 sur 5</div><div class="l">des fatigues<br>au cabinet</div></div><div class="stat"><div class="n">143</div><div class="l">écoute<br>24 h sur 24</div></div></div>
+<p class="disclaimer">Information générale. Ne remplace pas une consultation.</p>
+    </section>
+    <section class="slide" data-i="1">
+<span class="eyebrow">Comprendre · la base commune</span><h2>Un coup de moins bien, ou plus ?</h2><div class="card"><div class="row"><span class="pip"></span><div class="txt"><b>Avoir un coup de moins bien est normal.</b> Quand la tristesse ou la perte d’intérêt durent plus de deux semaines, presque tous les jours, il peut s’agir d’une dépression.</div></div><div class="row"><span class="pip"></span><div class="txt"><b>Elle touche aussi le corps</b> : sommeil, appétit, fatigue, concentration.</div></div><div class="row"><span class="pip"></span><div class="txt"><b>Chez le médecin de famille</b>, la dépression est la cause de fatigue la plus souvent identifiée : environ une personne fatiguée sur cinq.</div></div><div class="row"><span class="pip" style="background:var(--terra)"></span><div class="txt"><b>Elle se soigne</b> : psychothérapie, activité physique, et un antidépresseur quand elle est modérée à sévère.</div></div></div>
+    </section>
+    <section class="slide" data-i="2">
+<span class="eyebrow">Comprendre · deux questions</span><h2>Les deux dernières semaines.</h2><p class="sub">À quelle fréquence avez-vous été gêné·e par ces problèmes ?</p><div class="card"><div class="txt" style="margin-bottom:10px"><b>Peu d’intérêt ou de plaisir à faire les choses</b></div><div class="chips"><button type="button" class="chip phq" data-q="0" data-v="0" aria-pressed="false">Jamais</button><button type="button" class="chip phq" data-q="0" data-v="1" aria-pressed="false">Plusieurs jours</button><button type="button" class="chip phq" data-q="0" data-v="2" aria-pressed="false">Plus de la moitié du temps</button><button type="button" class="chip phq" data-q="0" data-v="3" aria-pressed="false">Presque tous les jours</button></div></div><div class="card"><div class="txt" style="margin-bottom:10px"><b>Triste, déprimé·e ou sans espoir</b></div><div class="chips"><button type="button" class="chip phq" data-q="1" data-v="0" aria-pressed="false">Jamais</button><button type="button" class="chip phq" data-q="1" data-v="1" aria-pressed="false">Plusieurs jours</button><button type="button" class="chip phq" data-q="1" data-v="2" aria-pressed="false">Plus de la moitié du temps</button><button type="button" class="chip phq" data-q="1" data-v="3" aria-pressed="false">Presque tous les jours</button></div></div><div class="alert-out" id="phqOut">Répondez aux deux questions.</div><p class="disclaimer" style="margin-top:0">Ces deux questions (PHQ-2) servent au repérage, pas au diagnostic.</p>
+    </section>
+    <section class="slide" data-i="3">
+<span class="eyebrow">Repérer</span><h2>Cochez ce qui vous concerne.</h2><p class="sub">Ces signes ne veulent pas forcément dire que c’est grave. Mais ils changent le délai.</p><div id="flags"><div class="group-lbl">Urgent</div><label class="check"><input type="checkbox" data-level="urgent"><div class="txt">J’ai des <b>idées de mort ou de suicide</b></div></label><label class="check"><input type="checkbox" data-level="urgent"><div class="txt">Je ne m’alimente plus, je ne sors plus du lit <b>depuis plusieurs jours</b></div></label><div class="group-lbl">À voir rapidement</div><label class="check"><input type="checkbox" data-level="rdv"><div class="txt"><b>Tristesse ou perte d’intérêt</b> presque tous les jours depuis plus de deux semaines</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Je n’arrive plus à <b>travailler</b> ou à m’occuper de moi</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Je prends de l’<b>alcool ou des médicaments</b> pour tenir</div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Je me sens très mal <b>depuis un accouchement</b></div></label><label class="check"><input type="checkbox" data-level="rdv"><div class="txt">Des phases d’<b>excitation inhabituelle</b>, avec très peu de sommeil sans fatigue</div></label></div><div class="alert-out" id="flagOut" role="status" aria-live="polite"><b>Aucun signe coché</b>Les écrans suivants vous disent comment vous soigner à la maison. Si ça ne s’améliore pas dans les délais habituels, prenez rendez-vous.</div><div class="card"><div class="card-title">Les bons numéros</div><div class="numbers"><span class="k">143</span><span class="v">La Main Tendue : écoute anonyme, 24 h sur 24.</span><span class="k">147</span><span class="v">Pro Juventute : pour les jeunes, 24 h sur 24.</span><span class="k">0848 133 133</span><span class="v">Médecins de garde du canton de Vaud, y compris pour les urgences psychiatriques.</span><span class="k">144</span><span class="v">Urgence vitale, ou si vous êtes en danger.</span></div></div>
+    </section>
+    <section class="slide" data-i="4">
+<span class="eyebrow">Agir</span><h2>Ce qui aide vraiment.</h2><div class="lever" style="border-left-color:var(--teal)"><div class="lt">Bouger, même un peu</div><div class="ld">Dans une synthèse de 218 essais, la marche, la course, le renforcement musculaire et le yoga ont réduit la dépression à peu près autant que la psychothérapie.</div><div class="ev">Noetel et al., BMJ 2024.</div></div><div class="lever" style="border-left-color:var(--blue)"><div class="lt">Garder un rythme</div><div class="ld">Se lever à heure fixe, sortir à la lumière du jour, garder quelques activités agréables même sans envie : l’envie revient souvent après l’action.</div></div><div class="lever" style="border-left-color:var(--terra)"><div class="lt">Se faire aider</div><div class="ld">La psychothérapie est remboursée par l’assurance de base sur prescription de votre médecin. Un antidépresseur peut être proposé quand la dépression est plus marquée ; il met quelques semaines à agir.</div></div><div class="card"><div class="card-title">Le sommeil</div><div class="txt">Moral et sommeil sont liés. Le programme sommeil de Continuum peut aider en parallèle.</div></div>
+    </section>
+    <section class="slide" data-i="5">
+<span class="eyebrow">Préparer la consultation</span><h2>Ce qu’on fera probablement ensemble.</h2><p class="sub">Savoir à quoi s’attendre rend la consultation plus utile, et plus courte.</p><div class="card"><div class="card-title">Au cabinet</div><div class="lab"><span class="k">Entretien</span><span class="v">Votre humeur, depuis quand, les événements, le sommeil, l’appétit.</span><span class="k">Questions</span><span class="v">Un court questionnaire sur l’humeur.</span><span class="k">Examen</span><span class="v">Et une prise de sang si besoin (thyroïde, anémie).</span><span class="k">Plan</span><span class="v">Psychothérapie, activité, médicament si nécessaire, et un suivi rapproché.</span></div></div><div class="card"><div class="card-title">Ce que vous pouvez apporter</div><div class="row"><span class="pip"></span><div class="txt"><b>Depuis quand</b> ça ne va pas, et ce qui s’est passé.</div></div><div class="row"><span class="pip"></span><div class="txt">Votre <b>sommeil et votre appétit</b>.</div></div><div class="row"><span class="pip"></span><div class="txt">Vos <b>consommations</b> et vos <b>médicaments</b>.</div></div></div>
+    </section>
+    <section class="slide" data-i="6">
+<span class="eyebrow">Votre premier pas</span><h2>Aujourd’hui, je…</h2><p class="sub">Touchez ce que vous faites dès maintenant.</p><div class="chips"><button type="button" class="chip" aria-pressed="false">Sortir à la lumière du jour</button><button type="button" class="chip" aria-pressed="false">Marcher 20 minutes</button><button type="button" class="chip" aria-pressed="false">Appeler un proche</button><button type="button" class="chip" aria-pressed="false">Garder une activité agréable</button><button type="button" class="chip" aria-pressed="false">Me lever à heure fixe</button><button type="button" class="chip" aria-pressed="false">Prendre rendez-vous</button></div><div class="follow"><div class="ic">J+7</div><div class="txt">Dans une semaine, l’application vous demandera <b>comment vous allez</b>. Si ce n’est pas mieux, ou si un signe d’alerte apparaît, on se voit.</div></div><div class="sources"><b>Sources</b> · Stadje et al., BMC Fam Pract 2016 ; Noetel et al., BMJ 2024 (exercice et dépression) ; Kroenke et al., Med Care 2003 (PHQ-2).</div><p class="disclaimer">Information générale, validée par le Dr Adner Neyret, médecin généraliste. Ne remplace pas une consultation. En cas de signe d’alerte, contactez le cabinet.</p>
+    </section>
+  </div>
+  <div class="nav">
+    <button class="nav-btn" id="prev" onclick="step(-1)" disabled aria-label="Précédent">←</button>
+    <span class="counter" id="counter">1 / 7</span>
+    <button class="nav-btn primary" id="next" onclick="step(1)">Suivant →</button>
+  </div>
+</div>
+<script type="application/json" id="msgs">{"urgent": "<b>Ne restez pas seul·e.</b>Si vous êtes en danger, appelez le 144. Pour parler tout de suite à quelqu’un : La Main Tendue au 143. Pour un avis médical urgent : le cabinet, ou le 0848 133 133 s’il est fermé.", "rdv": "<b>Contactez le cabinet aujourd’hui ou demain.</b>Ce n’est pas forcément grave, mais on ne laisse pas traîner. La nuit et le week-end : 0848 133 133 (médecins de garde, Vaud).", "none": "<b>Aucun signe coché</b>Les écrans suivants vous disent comment vous soigner à la maison. Si ça ne s’améliore pas dans les délais habituels, prenez rendez-vous."}</script>
+<script>
+var cur = 0, slides = document.querySelectorAll('.slide'), total = slides.length;
+var bar = document.getElementById('progress'), dots = [];
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot'; bar.appendChild(d); dots.push(d); }
+function render() {
+  slides.forEach(function (s, i) { s.classList.toggle('active', i === cur); s.classList.toggle('prev', i < cur); });
+  dots.forEach(function (d, i) { d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' done' : ''); });
+  document.getElementById('prev').disabled = cur === 0;
+  var n = document.getElementById('next');
+  n.textContent = cur === total - 1 ? '✓ Terminé' : 'Suivant →';
+  n.classList.toggle('finish', cur === total - 1);
+  document.getElementById('counter').textContent = (cur + 1) + ' / ' + total;
+  slides[cur].scrollTop = 0;
+}
+function post(p) { try { if (window.NcareBridge && window.NcareBridge.postMessage) { window.NcareBridge.postMessage(JSON.stringify(p)); return true; } } catch (e) {} return false; }
+function finish() {
+  /* Dans l'application : on prévient l'app, qui ferme la fiche. */
+  if (post({event:'completed', fiche:document.body.getAttribute('data-fiche')})) return;
+  /* Ouverte depuis la bibliothèque : on y retourne. */
+  if (/[?&]from=bibliotheque/.test(location.search) || (document.referrer && /bibliotheque\.html/.test(document.referrer))) { location.href = 'bibliotheque.html'; return; }
+  /* Ouverte seule : écran de fin, sans changer de page. */
+  document.getElementById('endScreen').style.display = 'flex';
+}
+function step(dir) { var n = cur + dir; if (n < 0) return; if (n >= total) { finish(); return; } cur = n; render(); }
+document.getElementById('restart').addEventListener('click', function () { document.getElementById('endScreen').style.display = 'none'; cur = 0; render(); });
+var sx = 0, sy = 0, ok = true, el = document.getElementById('slides');
+el.addEventListener('touchstart', function (e) { ok = !(e.target.closest && e.target.closest('input,textarea,summary,.chip,.check')); sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+el.addEventListener('touchend', function (e) { if (!ok) return; var dx = sx - e.changedTouches[0].clientX, dy = sy - e.changedTouches[0].clientY; if (Math.abs(dx) > 60 && Math.abs(dy) < 80) step(dx > 0 ? 1 : -1); }, { passive: true });
+document.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+document.querySelectorAll('.chip').forEach(function (c) { c.addEventListener('click', function () { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }); });
+var out = document.getElementById('flagOut'), MSG = JSON.parse(document.getElementById('msgs').textContent);
+document.getElementById('flags').addEventListener('change', function () {
+  var urg = document.querySelectorAll('#flags input[data-level=urgent]:checked').length;
+  var n = document.querySelectorAll('#flags input:checked').length;
+  if (urg) { out.className = 'alert-out urgent'; out.innerHTML = MSG.urgent; }
+  else if (n) { out.className = 'alert-out rdv'; out.innerHTML = MSG.rdv; }
+  else { out.className = 'alert-out'; out.innerHTML = MSG.none; }
+});
+render();
+</script>
+<script>
+document.querySelectorAll('.phq').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var q = b.getAttribute('data-q');
+    document.querySelectorAll('.phq[data-q="' + q + '"]').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+    var on = document.querySelectorAll('.phq[aria-pressed=true]'), out = document.getElementById('phqOut');
+    if (on.length < 2) return;
+    var s = 0; on.forEach(function (o) { s += +o.getAttribute('data-v'); });
+    if (s >= 3) { out.className = 'alert-out rdv'; out.innerHTML = '<b>Vos réponses méritent qu’on en parle.</b>Prenez rendez-vous : une dépression se soigne, et plus tôt c’est mieux.'; }
+    else { out.className = 'alert-out'; out.innerHTML = '<b>Pas de signal fort</b>Si ça ne va pas pour autant, parlez-en : votre ressenti compte.'; }
+  });
+});
+</script>
+</body>
+</html>
