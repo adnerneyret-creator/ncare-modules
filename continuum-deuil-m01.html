@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Continuum · Vous venez de perdre quelqu&#x27;un</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --acc:#0891B2; --acc-l:#ECFEFF; --acc-d:#0670A0; --acc-rgb:8,145,178;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3; --green-d:#147A53;
+  --coral:#F0503A; --coral-l:#FFF0EE; --coral-d:#B8321F;
+  --amber:#F5A623; --amber-l:#FEF6E4; --amber-d:#B07518;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0670A0;
+  --ink50:#64748B; --ink15:#CBD5E1;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--acc); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--acc); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--acc); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.55); margin-top:2px; line-height:1.5; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.78); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:36px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.75; margin-top:4px; line-height:1.4; }
+.note-acc { background:rgba(var(--acc-rgb),0.08); border:1px solid rgba(var(--acc-rgb),0.2); }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+.commitment-box { background:var(--navy2); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.commitment-label { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; }
+.commitment-input { background:rgba(255,255,255,0.07); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:12px; padding:14px; font-size:14px; color:white; font-family:inherit; resize:none; min-height:80px; outline:none; line-height:1.5; }
+.commitment-input::placeholder { color:rgba(255,255,255,0.3); }
+.commitment-input:focus { border-color:var(--acc); }
+.slide-final { background:linear-gradient(160deg, #1C2333 0%, #0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:24px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.72); line-height:1.6; }
+.final-items { display:flex; flex-direction:column; gap:8px; }
+.final-item { background:rgba(var(--acc-rgb),0.1); border:1px solid rgba(var(--acc-rgb),0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.final-item-icon { font-size:20px; }
+.final-item-text { font-size:13px; color:white; line-height:1.4; }
+.final-cta { background:var(--acc); border-radius:14px; padding:16px; text-align:center; }
+.final-cta-title { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.final-cta-sub { font-size:12px; color:rgba(15,23,42,0.65); }
+.alert-box { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.3); border-radius:12px; padding:12px 14px; font-size:12.5px; color:rgba(255,255,255,0.85); line-height:1.55; }
+.alert-box strong { color:#FCA5A5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">CONTINUUM · DEUIL</div>
+      <div class="cover-emoji">🕯️</div>
+      <div class="cover-title">Vous venez de perdre<br>quelqu'un.</div>
+      <div class="cover-sub">Le cabinet le sait. Ce module ne vous dira pas comment aller mieux. Il vous dit ce qui est normal, ce qui ne l'est pas, et que vous n'êtes pas seul·e avec ça.</div>
+      <div class="cover-tag">Les premières semaines</div>
+      <div class="cover-stats"><div class="stat"><div class="stat-num">6</div><div class="stat-lbl">écrans</div></div><div class="stat"><div class="stat-num">3'</div><div class="stat-lbl">à lire</div></div><div class="stat"><div class="stat-num">0</div><div class="stat-lbl">délai « normal » pour aller mieux</div></div></div>
+    </div>
+
+    <!-- 1: LE CHIFFRE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Le deuil n'est pas une maladie. Mais il use le corps.</div>
+      <div class="s-sub">Dans l'année qui suit la perte d'un proche, le corps est plus fragile. C'est pour ça que le cabinet reste là.</div>
+      <div style="display:flex; gap:10px;"><div class="highlight-box" style="background:rgba(var(--teal-rgb,8,145,178),0.12); flex:1;"><div class="highlight-num" style="color:var(--teal);">↑</div><div class="highlight-lbl" style="color:var(--teal);">Risque cardiaque</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">plus élevé les premiers jours et semaines, puis il redescend</div></div><div class="highlight-box" style="background:rgba(var(--gold-rgb,201,168,76),0.12); flex:1;"><div class="highlight-num" style="color:var(--gold);">6-12</div><div class="highlight-lbl" style="color:var(--gold);">Mois</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">où tout peut encore être normal</div></div></div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--acc);">Ce qui est normal, même si ça ne l'est pas pour vous</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Le corps avant l'esprit :</strong> ne plus dormir, ne plus manger, ou l'inverse. Douleurs, oppression, cœur qui s'emballe. Oublier des choses simples. Le corps porte ce que la tête ne peut pas encore.</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Les vagues :</strong> des heures normales, puis une chanson, une odeur, et tout s'effondre. Ce n'est pas une rechute. C'est le deuil, qui ne va pas en ligne droite.</div></div><div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Les émotions qu'on n'ose pas dire :</strong> la colère contre la personne partie, le soulagement après une longue maladie, la culpabilité d'aller bien un après-midi. Toutes normales. Toutes dicibles ici.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: LE MECANISME -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">Ce que le cabinet<br>peut faire.</div>
+      <div class="s-sub">Pas remplacer. Accompagner, et surveiller le corps.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">Concrètement</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Un rendez-vous sans motif médical.</strong> Parler, ou ne pas parler. Le médecin vous connaît, et connaît peut-être la personne que vous avez perdue. Prenez-le quand vous voulez ; la care manager vous le propose dans deux semaines si vous ne l'avez pas fait.</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Surveiller ce que le deuil fait au corps :</strong> tension, sommeil, poids, alcool. Sans jugement. Un somnifère quelques nuits peut avoir sa place ; des mois, non. On en parle.</div></div><div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>Orienter si le deuil se bloque :</strong> après 6 à 12 mois, si rien ne bouge, si la vie reste à l'arrêt, il existe des accompagnements spécifiques (psychologue, groupes de parole, As'trame pour les familles avec enfants). Ce n'est pas un échec. C'est une aide.</div></div>
+      </div>
+      <div class="alert-box"><strong>Appelez le cabinet aujourd'hui :</strong> idées de rejoindre la personne, alcool ou médicaments pour tenir, impossible de vous nourrir ou de vous lever depuis plusieurs jours. En danger maintenant : <strong>143</strong> (La Main Tendue, 24 h/24) ou <strong>144</strong>.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;">Il n'y a pas de bonne façon de faire un deuil, ni de durée. <strong style="color:var(--acc);">Il y a seulement le vôtre, et des gens qui restent à côté.</strong></div>
+      </div>
+    </div>
+
+    <!-- 3: LES LEVIERS -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Ce qui aide,<br>un peu, les premières semaines.</div>
+      <div class="s-sub">Rien n'enlève la douleur. Ces quatre choses empêchent le corps de lâcher.</div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);"><div class="tip-title" style="color:var(--teal-d);">🍽️  Manger quelque chose, trois fois par jour</div><div class="tip-text">Peu importe quoi. Une soupe, un yaourt, du pain. Laissez les autres cuisiner, acceptez ce qu'on vous apporte. Le corps a besoin de carburant pour tenir le choc.</div></div><div class="tip-card" style="background:var(--gold-l); border-color:var(--gold);"><div class="tip-title" style="color:var(--gold-d);">🌅  Se lever, s'habiller, sortir dix minutes</div><div class="tip-text">Même sans but. La lumière du jour et le mouvement sont les deux seules choses qui protègent le sommeil et l'humeur sans médicament.</div></div><div class="tip-card" style="background:var(--green-l); border-color:var(--green);"><div class="tip-title" style="color:var(--green-d);">🤝  Dire oui à une personne</div><div class="tip-text">Pas à tout le monde. Une. Qui peut venir, s'asseoir, et ne rien dire. Et dire non aux autres sans culpabilité ; vous n'avez pas à gérer leur gêne.</div></div><div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);"><div class="tip-title" style="color:var(--coral-d);">🚫  Ne rien décider de grand</div><div class="tip-text">Pas de déménagement, pas de démission, pas de rupture, pas de vente dans les premiers mois. Le deuil décide mal. Ça attendra, et ce sera encore possible.</div></div>
+    </div>
+
+    <!-- 4: ENGAGEMENT -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">Ce dont vous avez besoin.</div>
+      <div class="s-sub">Une phrase, ou rien. Les deux sont bien.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); line-height:1.7; font-size:13px;">Dire de quoi on a besoin est difficile quand on ne le sait pas soi-même. Si une chose vous vient, écrivez-la. Le médecin la lira, si vous le souhaitez, et personne ne vous demandera de l'expliquer.</div>
+      </div>
+      <div class="commitment-box">
+        <div class="commitment-label">Ce dont j'aurais besoin en ce moment, c'est…</div>
+        <textarea class="commitment-input" placeholder="ex. que quelqu&#x27;un m&#x27;aide pour les papiers.
+ou : dormir une nuit.
+ou : je ne sais pas."></textarea><label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.8);cursor:pointer;"><input type="checkbox" id="shareNote" style="width:20px;height:20px;accent-color:var(--acc);flex-shrink:0;">Partager cette phrase avec le médecin</label>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.55); font-size:12px;">Cochez la case pour que le médecin lise cette phrase. Sinon, elle reste sur votre téléphone. L'application n'est pas surveillée en continu. Urgence : 144 · Détresse : 143. « Je ne sais pas » est une réponse.</div>
+      </div>
+    </div>
+
+    <!-- 5: SUITE -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">DEUIL</div>
+      <div class="final-title">Vous n'avez rien à faire.<br>On reste là.</div>
+      <div class="final-body">L'application ne vous enverra ni questionnaire ni rappel pendant un mois. La care manager vous écrit une fois, dans deux semaines, pour vous proposer un rendez-vous. Vous répondez si vous voulez.</div>
+      <div class="final-items"><div class="final-item"><div class="final-item-icon">🕯️</div><div class="final-item-text"><strong>Pas de sollicitation</strong> de l'application pendant 30 jours.</div></div><div class="final-item"><div class="final-item-icon">💬</div><div class="final-item-text"><strong>Un message de la care manager</strong> dans deux semaines, auquel vous n'êtes pas obligé·e de répondre.</div></div><div class="final-item"><div class="final-item-icon">🩺</div><div class="final-item-text"><strong>Un rendez-vous</strong> quand vous voulez, pour parler, ou pour le corps.</div></div></div>
+      <div class="final-cta">
+        <div class="final-cta-title">Fermer ce module</div>
+        <div class="final-cta-sub">Il restera dans l'application, si vous voulez le relire</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&larr;</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Suivant &rarr;</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' active' : ''); bar.appendChild(d); dots.push(d); }
+function updateDots() { dots.forEach(function(d, i) { d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : ''); }); }
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 3) return 'slide slide-white';
+  if (idx === 5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  slides[current].scrollTop = 0;
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '\u2713 Terminé' : 'Suivant \u2192';
+  nb.style.background = current === total - 1 ? '#1DB87E' : 'var(--acc)';
+  nb.style.color = current === total - 1 ? 'white' : 'var(--navy)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) { var d = sx - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); }, {passive:true});
+document.addEventListener('keydown', function(e) { if (e.key === 'ArrowRight') onNext(); if (e.key === 'ArrowLeft') navigate(-1); });
+</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
+<script>
+/* CONTINUUM-NOTE : sauvegarde locale de la phrase, partage sur choix, bouton d'action */
+(function(){
+  var MODULE = 'deuil-m01', ACTION = 'close';
+  function post(p){ try{ if(window.NcareBridge && window.NcareBridge.postMessage){ window.NcareBridge.postMessage(JSON.stringify(p)); return true; } }catch(e){} return false; }
+  var ta = document.querySelector('.commitment-input'), cb = document.getElementById('shareNote');
+  var KEY = 'continuum-note-' + MODULE;
+  try{ var v = localStorage.getItem(KEY); if(ta && v){ ta.value = v; } }catch(e){}
+  if(ta){ ta.addEventListener('input', function(){ try{ localStorage.setItem(KEY, ta.value); }catch(e){} }); }
+  var sent = false;
+  function sendNote(){
+    if(!sent && ta && cb && cb.checked && ta.value.trim()){
+      sent = true;
+      post({event:'note', module: MODULE, text: ta.value.trim(), share: true});
+    }
+  }
+  var fin = window.finishModule;
+  window.finishModule = function(){ sendNote(); return fin(); };
+  var cta = document.querySelector('.final-cta');
+  if(cta){
+    cta.setAttribute('role','button'); cta.setAttribute('tabindex','0'); cta.style.cursor = 'pointer';
+    var go = function(){
+      sendNote();
+      var ok = post({event:'action', module: MODULE, action: ACTION});
+      if(!ok && ACTION !== 'close' && ACTION !== 'checklist'){ var s = cta.querySelector('.final-cta-sub'); if(s){ s.textContent = 'Disponible dans l’application Continuum'; } }
+      if(ACTION === 'close'){ window.finishModule(); }
+    };
+    cta.addEventListener('click', go);
+    cta.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  }
+})();
+</script>
+</body>
+</html>

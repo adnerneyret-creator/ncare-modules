@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Continuum · Arrêter de fumer, jour 1</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --acc:#0891B2; --acc-l:#ECFEFF; --acc-d:#0670A0; --acc-rgb:8,145,178;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3; --green-d:#147A53;
+  --coral:#F0503A; --coral-l:#FFF0EE; --coral-d:#B8321F;
+  --amber:#F5A623; --amber-l:#FEF6E4; --amber-d:#B07518;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0670A0;
+  --ink50:#64748B; --ink15:#CBD5E1;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--acc); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--acc); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--acc); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.55); margin-top:2px; line-height:1.5; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.78); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:36px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.75; margin-top:4px; line-height:1.4; }
+.note-acc { background:rgba(var(--acc-rgb),0.08); border:1px solid rgba(var(--acc-rgb),0.2); }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+.commitment-box { background:var(--navy2); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.commitment-label { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; }
+.commitment-input { background:rgba(255,255,255,0.07); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:12px; padding:14px; font-size:14px; color:white; font-family:inherit; resize:none; min-height:80px; outline:none; line-height:1.5; }
+.commitment-input::placeholder { color:rgba(255,255,255,0.3); }
+.commitment-input:focus { border-color:var(--acc); }
+.slide-final { background:linear-gradient(160deg, #1C2333 0%, #0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:24px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.72); line-height:1.6; }
+.final-items { display:flex; flex-direction:column; gap:8px; }
+.final-item { background:rgba(var(--acc-rgb),0.1); border:1px solid rgba(var(--acc-rgb),0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.final-item-icon { font-size:20px; }
+.final-item-text { font-size:13px; color:white; line-height:1.4; }
+.final-cta { background:var(--acc); border-radius:14px; padding:16px; text-align:center; }
+.final-cta-title { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.final-cta-sub { font-size:12px; color:rgba(15,23,42,0.65); }
+.alert-box { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.3); border-radius:12px; padding:12px 14px; font-size:12.5px; color:rgba(255,255,255,0.85); line-height:1.55; }
+.alert-box strong { color:#FCA5A5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">CONTINUUM · TABAC</div>
+      <div class="cover-emoji">🌬️</div>
+      <div class="cover-title">Jour 1.<br>Votre corps a déjà commencé.</div>
+      <div class="cover-sub">Vous avez décidé d'arrêter, et le cabinet vous accompagne. Ce qui va se passer dans les 72 prochaines heures est connu, prévisible, et ça passe.</div>
+      <div class="cover-tag">Jour 1 · Les 72 premières heures</div>
+      <div class="cover-stats"><div class="stat"><div class="stat-num">6</div><div class="stat-lbl">écrans</div></div><div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">à lire</div></div><div class="stat"><div class="stat-num">×2</div><div class="stat-lbl">vos chances avec un suivi</div></div></div>
+    </div>
+
+    <!-- 1: LE CHIFFRE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">20 minutes après la dernière cigarette, votre tension redescend.</div>
+      <div class="s-sub">Le bénéfice commence avant le manque. C'est ce qu'il faut tenir en tête quand il arrive.</div>
+      <div style="display:flex; gap:10px;"><div class="highlight-box" style="background:rgba(var(--teal-rgb,8,145,178),0.12); flex:1;"><div class="highlight-num" style="color:var(--teal);">72 h</div><div class="highlight-lbl" style="color:var(--teal);">Le pic du manque</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">puis ça redescend, chaque jour</div></div><div class="highlight-box" style="background:rgba(var(--green-rgb,29,184,126),0.12); flex:1;"><div class="highlight-num" style="color:var(--green);">-50 %</div><div class="highlight-lbl" style="color:var(--green);">De risque d'infarctus</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">après 1 an sans tabac</div></div></div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--acc);">Ce que votre corps fait, heure par heure</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>20 minutes</strong> : pouls et tension reviennent à la normale.</div></div><div class="item"><div class="item-dot" style="background:var(--green);"></div><div class="item-text"><strong>8 heures</strong> : le monoxyde de carbone quitte le sang, l'oxygène remonte.</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>48 heures</strong> : la nicotine est éliminée. Le goût et l'odorat reviennent. C'est aussi le moment où le manque est le plus fort.</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>2 à 4 semaines</strong> : l'irritabilité et la toux de nettoyage s'estompent. Le souffle s'améliore.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: LE MECANISME -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">Le manque : ce que c'est,<br>et combien de temps ça dure.</div>
+      <div class="s-sub">Une envie dure 3 à 5 minutes. Pas plus. Jamais.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">Dans votre cerveau</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>La nicotine occupait des récepteurs</strong> qui réclament leur dose toutes les 1 à 2 heures. Sans elle, ils protestent : irritabilité, concentration, envie de sucre, sommeil. C'est chimique, pas un manque de volonté.</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Les récepteurs se calment en 2 à 4 semaines.</strong> Les substituts (patch + gomme ou spray) les occupent en douceur pendant ce temps. Avec un substitut bien dosé, les chances de réussite doublent.</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Les envies-réflexes</strong> (café, pause, voiture, apéro) reviennent plus longtemps. Elles sont liées au geste, pas à la nicotine. Elles durent 3 minutes et s'espacent.</div></div>
+      </div>
+      <div class="alert-box"><strong>Un écart n'est pas une rechute.</strong> Une cigarette fumée ne remet pas le compteur à zéro. Notez-la, et continuez. Les gens qui réussissent ont souvent eu trois ou quatre essais avant.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;">Si le médecin vous a prescrit une aide (substituts nicotiniques ou médicament), elle est dosée sur votre consommation réelle. <strong style="color:var(--acc);">Si vous avez encore très envie malgré le traitement, ce n'est pas vous : c'est la dose. Appelez, on ajuste.</strong></div>
+      </div>
+    </div>
+
+    <!-- 3: LES LEVIERS -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Quatre outils<br>pour les 72 heures.</div>
+      <div class="s-sub">Quatre gestes simples, à utiliser dès que l'envie arrive.</div>
+      <div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);"><div class="tip-title" style="color:var(--teal-d);">⏳  Différer</div><div class="tip-text">L'envie passe en 3 à 5 minutes. Regardez l'heure, et attendez. Elle part toujours. Comptez-les sur un papier : vous verrez le nombre baisser de jour en jour.</div></div><div class="tip-card" style="background:var(--green-l); border-color:var(--green);"><div class="tip-title" style="color:var(--green-d);">💧  Boire, respirer</div><div class="tip-text">Un grand verre d'eau, puis cinq respirations lentes, en expirant longuement. Ça occupe la bouche et les mains, et ça calme le système nerveux qui proteste.</div></div><div class="tip-card" style="background:var(--gold-l); border-color:var(--gold);"><div class="tip-title" style="color:var(--gold-d);">🚶  Déplacer</div><div class="tip-text">Changez de pièce, sortez, marchez cinq minutes. L'envie est attachée à un lieu et à un geste ; changez les deux. L'activité physique réduit le manque de façon mesurée.</div></div><div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);"><div class="tip-title" style="color:var(--coral-d);">📲  Dire</div><div class="tip-text">Un message à l'équipe dans l'application quand c'est dur. Pas pour avoir la permission, pour ne pas être seul·e à ce moment-là. Le suivi humain double les chances de tenir à 6 mois.</div></div>
+    </div>
+
+    <!-- 4: ENGAGEMENT -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">Votre raison.</div>
+      <div class="s-sub">Pas un objectif. Une raison. La vôtre.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); line-height:1.7; font-size:13px;">À 48 heures, quand le manque sera au plus fort, vous relirez cette phrase. Les gens qui tiennent ne tiennent pas pour « la santé » en général ; ils tiennent pour quelque chose de précis.</div>
+      </div>
+      <div class="commitment-box">
+        <div class="commitment-label">J'arrête de fumer parce que…</div>
+        <textarea class="commitment-input" placeholder="ex. je veux monter les escaliers avec ma fille sans m&#x27;arrêter.
+ou : je ne veux plus sentir la cigarette sur mes doigts quand je la prends dans les bras.
+ou : 200 francs par mois pour autre chose."></textarea><label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.8);cursor:pointer;"><input type="checkbox" id="shareNote" style="width:20px;height:20px;accent-color:var(--acc);flex-shrink:0;">Partager cette phrase avec le médecin</label>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.55); font-size:12px;">Par défaut, ce que vous écrivez reste sur votre téléphone. Cochez la case si vous voulez que le médecin le lise. L'application n'est pas surveillée en continu. Urgence : 144 · Détresse : 143.</div>
+      </div>
+    </div>
+
+    <!-- 5: SUITE -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">TABAC · Jour 1</div>
+      <div class="final-title">Les trois premiers jours.<br>Puis les trois premières semaines.</div>
+      <div class="final-body">Quand c'est dur, écrivez à l'équipe dans l'application : elle répond les jours ouvrables. Le médecin ajuste les substituts à J+7.</div>
+      <div class="final-items"><div class="final-item"><div class="final-item-icon">📲</div><div class="final-item-text"><strong>Un message à l'équipe</strong> quand c'est dur, les jours ouvrables.</div></div><div class="final-item"><div class="final-item-icon">🩺</div><div class="final-item-text"><strong>Contrôle à J+7</strong> : la dose des substituts, le sommeil, le poids.</div></div><div class="final-item"><div class="final-item-icon">📦</div><div class="final-item-text"><strong>À aborder au rendez-vous</strong> : les envies-réflexes, le poids et l'appétit, et le jour 30.</div></div></div>
+      <div class="final-cta">
+        <div class="final-cta-title">Garder ma raison sous les yeux</div>
+        <div class="final-cta-sub">Relisez-la quand l'envie arrive · Elle dure 3 minutes</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&larr;</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Suivant &rarr;</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' active' : ''); bar.appendChild(d); dots.push(d); }
+function updateDots() { dots.forEach(function(d, i) { d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : ''); }); }
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 3) return 'slide slide-white';
+  if (idx === 5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  slides[current].scrollTop = 0;
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '\u2713 Terminé' : 'Suivant \u2192';
+  nb.style.background = current === total - 1 ? '#1DB87E' : 'var(--acc)';
+  nb.style.color = current === total - 1 ? 'white' : 'var(--navy)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) { var d = sx - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); }, {passive:true});
+document.addEventListener('keydown', function(e) { if (e.key === 'ArrowRight') onNext(); if (e.key === 'ArrowLeft') navigate(-1); });
+</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
+<script>
+/* CONTINUUM-NOTE : sauvegarde locale de la phrase, partage sur choix, bouton d'action */
+(function(){
+  var MODULE = 'tabac-j1', ACTION = 'close';
+  function post(p){ try{ if(window.NcareBridge && window.NcareBridge.postMessage){ window.NcareBridge.postMessage(JSON.stringify(p)); return true; } }catch(e){} return false; }
+  var ta = document.querySelector('.commitment-input'), cb = document.getElementById('shareNote');
+  var KEY = 'continuum-note-' + MODULE;
+  try{ var v = localStorage.getItem(KEY); if(ta && v){ ta.value = v; } }catch(e){}
+  if(ta){ ta.addEventListener('input', function(){ try{ localStorage.setItem(KEY, ta.value); }catch(e){} }); }
+  var sent = false;
+  function sendNote(){
+    if(!sent && ta && cb && cb.checked && ta.value.trim()){
+      sent = true;
+      post({event:'note', module: MODULE, text: ta.value.trim(), share: true});
+    }
+  }
+  var fin = window.finishModule;
+  window.finishModule = function(){ sendNote(); return fin(); };
+  var cta = document.querySelector('.final-cta');
+  if(cta){
+    cta.setAttribute('role','button'); cta.setAttribute('tabindex','0'); cta.style.cursor = 'pointer';
+    var go = function(){
+      sendNote();
+      var ok = post({event:'action', module: MODULE, action: ACTION});
+      if(!ok && ACTION !== 'close' && ACTION !== 'checklist'){ var s = cta.querySelector('.final-cta-sub'); if(s){ s.textContent = 'Disponible dans l’application Continuum'; } }
+      if(ACTION === 'close'){ window.finishModule(); }
+    };
+    cta.addEventListener('click', go);
+    cta.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  }
+})();
+</script>
+</body>
+</html>

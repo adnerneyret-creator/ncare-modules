@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Continuum · Et si on regardait l&#x27;alcool</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --acc:#F5A623; --acc-l:#FEF6E4; --acc-d:#B07518; --acc-rgb:245,166,35;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3; --green-d:#147A53;
+  --coral:#F0503A; --coral-l:#FFF0EE; --coral-d:#B8321F;
+  --amber:#F5A623; --amber-l:#FEF6E4; --amber-d:#B07518;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0670A0;
+  --ink50:#64748B; --ink15:#CBD5E1;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--acc); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--acc); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--acc); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.55); margin-top:2px; line-height:1.5; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.78); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:36px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.75; margin-top:4px; line-height:1.4; }
+.note-acc { background:rgba(var(--acc-rgb),0.08); border:1px solid rgba(var(--acc-rgb),0.2); }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+.commitment-box { background:var(--navy2); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.commitment-label { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; }
+.commitment-input { background:rgba(255,255,255,0.07); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:12px; padding:14px; font-size:14px; color:white; font-family:inherit; resize:none; min-height:80px; outline:none; line-height:1.5; }
+.commitment-input::placeholder { color:rgba(255,255,255,0.3); }
+.commitment-input:focus { border-color:var(--acc); }
+.slide-final { background:linear-gradient(160deg, #1C2333 0%, #0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:24px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.72); line-height:1.6; }
+.final-items { display:flex; flex-direction:column; gap:8px; }
+.final-item { background:rgba(var(--acc-rgb),0.1); border:1px solid rgba(var(--acc-rgb),0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.final-item-icon { font-size:20px; }
+.final-item-text { font-size:13px; color:white; line-height:1.4; }
+.final-cta { background:var(--acc); border-radius:14px; padding:16px; text-align:center; }
+.final-cta-title { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.final-cta-sub { font-size:12px; color:rgba(15,23,42,0.65); }
+.alert-box { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.3); border-radius:12px; padding:12px 14px; font-size:12.5px; color:rgba(255,255,255,0.85); line-height:1.55; }
+.alert-box strong { color:#FCA5A5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">CONTINUUM · ALCOOL</div>
+      <div class="cover-emoji">🍷</div>
+      <div class="cover-title">On en a parlé en consultation.<br>Regardons ensemble.</div>
+      <div class="cover-sub">Vous n'êtes pas « alcoolique ». Vous buvez peut-être plus que ce qui est bon pour votre sommeil, votre tension, votre foie ou votre humeur. Ce module ne juge pas. Il mesure, et il donne des leviers.</div>
+      <div class="cover-tag">Module 01 · Le premier mois</div>
+      <div class="cover-stats"><div class="stat"><div class="stat-num">6</div><div class="stat-lbl">écrans</div></div><div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">à lire</div></div><div class="stat"><div class="stat-num">10</div><div class="stat-lbl">verres par semaine : le seuil</div></div></div>
+    </div>
+
+    <!-- 1: LE CHIFFRE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Pour l'alcool, il n'y a pas de dose sans risque.</div>
+      <div class="s-sub">Les repères suisses ont été revus en 2026 : moins, c'est mieux. Chaque verre en moins compte.</div>
+      <div style="display:flex; gap:10px;"><div class="highlight-box" style="background:rgba(var(--amber-rgb,245,166,35),0.12); flex:1;"><div class="highlight-num" style="color:var(--amber);">1</div><div class="highlight-lbl" style="color:var(--amber);">Verre par jour</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">augmente déjà le risque de plusieurs cancers</div></div><div class="highlight-box" style="background:rgba(var(--coral-rgb,240,80,58),0.12); flex:1;"><div class="highlight-num" style="color:var(--coral);">3</div><div class="highlight-lbl" style="color:var(--coral);">Jours sans par semaine</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">un premier objectif concret</div></div></div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--acc);">Ce qu'un verre de trop fait, sans qu'on le sente</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Le sommeil :</strong> l'alcool endort, puis fragmente la deuxième moitié de nuit. On dort moins bien avec un verre qu'avec zéro, même si on s'endort plus vite.</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>La tension :</strong> boire moins fait baisser la tension de quelques mmHg, surtout au-delà de deux verres par jour. C'est un des leviers les plus simples sur l'hypertension.</div></div><div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>L'humeur :</strong> l'alcool calme sur le moment et aggrave l'anxiété le lendemain. Le cercle est documenté, et il se referme vite.</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Le foie et le poids :</strong> 7 kcal par gramme, et un foie qui stocke. Le ventre d'alcool existe, et il part quand l'alcool part.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: LE MECANISME -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">Où vous en êtes.</div>
+      <div class="s-sub">Le test que le médecin utilise, en trois questions. Honnêtement, pour vous.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">AUDIT-C</div>
+        <div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>À quelle fréquence buvez-vous ?</strong> Jamais (0), 1 fois par mois ou moins (1), 2 à 4 fois par mois (2), 2 à 3 fois par semaine (3), 4 fois ou plus (4).</div></div><div class="item"><div class="item-dot" style="background:var(--gold);"></div><div class="item-text"><strong>Combien de verres un jour où vous buvez ?</strong> 1 à 2 (0), 3 à 4 (1), 5 à 6 (2), 7 à 9 (3), 10 ou plus (4).</div></div><div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>À quelle fréquence 6 verres ou plus en une occasion ?</strong> Jamais (0), moins d'une fois par mois (1), chaque mois (2), chaque semaine (3), presque chaque jour (4).</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Total :</strong> 4 ou plus chez l'homme, 3 ou plus chez la femme, c'est le seuil où ça vaut la peine de changer quelque chose. L'application le calcule et le garde pour vous.</div></div>
+      </div>
+      <div class="alert-box"><strong>Ne pas arrêter brutalement</strong> si vous buvez tous les jours depuis longtemps : tremblements, sueurs, agitation au réveil sont des signes de sevrage, et le sevrage se fait avec le médecin, pas seul. Appelez le cabinet avant.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;">Un verre = 1 dl de vin, 3 dl de bière, 2 cl d'alcool fort. <strong style="color:var(--acc);">Le verre du restaurant fait souvent 1,5 verre.</strong> Comptez ce que vous versez, pas ce que vous croyez.</div>
+      </div>
+    </div>
+
+    <!-- 3: LES LEVIERS -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Quatre leviers<br>qui marchent sans « arrêter ».</div>
+      <div class="s-sub">Réduire, c'est déjà presque tout le bénéfice.</div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);"><div class="tip-title" style="color:var(--amber-d);">📅  Trois jours sans, par semaine</div><div class="tip-text">Fixes. Pas « quand je peux ». Lundi, mardi, jeudi, par exemple. Le foie récupère, le sommeil se répare, et on voit vite si c'est facile ou pas. Si ce n'est pas facile, c'est une information utile.</div></div><div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);"><div class="tip-title" style="color:var(--teal-d);">📏  Compter, pendant 30 jours</div><div class="tip-text">Chaque verre, le jour même, sur papier ou dans votre téléphone. Pas pour se punir : pour voir. Compter, c'est souvent déjà boire moins.</div></div><div class="tip-card" style="background:var(--green-l); border-color:var(--green);"><div class="tip-title" style="color:var(--green-d);">🥤  Remplacer le premier</div><div class="tip-text">Le premier verre est celui de l'habitude (le retour du travail, l'apéro, la cuisine). Un verre d'eau gazeuse avec du citron à sa place. Le deuxième, on y pense moins.</div></div><div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);"><div class="tip-title" style="color:var(--coral-d);">🛏️  Rien après 21 h</div><div class="tip-text">Pour le sommeil. Un verre à 19 h est éliminé à minuit ; un verre à 22 h fragmente la nuit entière.</div></div>
+    </div>
+
+    <!-- 4: ENGAGEMENT -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">Votre engagement<br>pour ce mois.</div>
+      <div class="s-sub">Mesurable. Réaliste.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); line-height:1.7; font-size:13px;">Réduire l'alcool, c'est une des rares choses où un petit changement donne un grand résultat, en deux semaines, sur le sommeil et la tension. Choisissez un geste que vous pouvez tenir 30 jours.</div>
+      </div>
+      <div class="commitment-box">
+        <div class="commitment-label">Pendant 30 jours, je m'engage à…</div>
+        <textarea class="commitment-input" placeholder="ex. trois jours sans alcool par semaine : lundi, mardi, jeudi.
+ou : compter chaque verre dans l&#x27;application.
+ou : rien après 21 h."></textarea><label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.8);cursor:pointer;"><input type="checkbox" id="shareNote" style="width:20px;height:20px;accent-color:var(--acc);flex-shrink:0;">Partager cette phrase avec le médecin</label>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.55); font-size:12px;">Par défaut, ce que vous écrivez reste sur votre téléphone. Cochez la case si vous voulez que le médecin le lise. L'application n'est pas surveillée en continu. Urgence : 144 · Détresse : 143.</div>
+      </div>
+    </div>
+
+    <!-- 5: SUITE -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">ALCOOL · Jour 1</div>
+      <div class="final-title">Trente jours de comptage.<br>Et on compare.</div>
+      <div class="final-body">Pendant 30 jours, notez vos verres pour vous, sur papier ou dans votre téléphone. Au point à 30 jours, le médecin refait avec vous le test AUDIT-C et regarde votre sommeil.</div>
+      <div class="final-items"><div class="final-item"><div class="final-item-icon">📲</div><div class="final-item-text"><strong>Votre carnet</strong> : vos verres, notés pour vous. Personne d'autre ne le lit.</div></div><div class="final-item"><div class="final-item-icon">🩺</div><div class="final-item-text"><strong>Point à 30 jours</strong> : les deux courbes, la tension, et la suite si vous voulez une suite.</div></div><div class="final-item"><div class="final-item-icon">📦</div><div class="final-item-text"><strong>À aborder au rendez-vous</strong> : l'alcool et le sommeil, en détail.</div></div></div>
+      <div class="final-cta">
+        <div class="final-cta-title">Choisir mes trois jours sans</div>
+        <div class="final-cta-sub">Lundi, mardi, jeudi ? À vous de les fixer</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&larr;</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Suivant &rarr;</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' active' : ''); bar.appendChild(d); dots.push(d); }
+function updateDots() { dots.forEach(function(d, i) { d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : ''); }); }
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 3) return 'slide slide-white';
+  if (idx === 5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  slides[current].scrollTop = 0;
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '\u2713 Terminé' : 'Suivant \u2192';
+  nb.style.background = current === total - 1 ? '#1DB87E' : 'var(--acc)';
+  nb.style.color = current === total - 1 ? 'white' : 'var(--navy)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) { var d = sx - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); }, {passive:true});
+document.addEventListener('keydown', function(e) { if (e.key === 'ArrowRight') onNext(); if (e.key === 'ArrowLeft') navigate(-1); });
+</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
+<script>
+/* CONTINUUM-NOTE : sauvegarde locale de la phrase, partage sur choix, bouton d'action */
+(function(){
+  var MODULE = 'alcool-m01', ACTION = 'close';
+  function post(p){ try{ if(window.NcareBridge && window.NcareBridge.postMessage){ window.NcareBridge.postMessage(JSON.stringify(p)); return true; } }catch(e){} return false; }
+  var ta = document.querySelector('.commitment-input'), cb = document.getElementById('shareNote');
+  var KEY = 'continuum-note-' + MODULE;
+  try{ var v = localStorage.getItem(KEY); if(ta && v){ ta.value = v; } }catch(e){}
+  if(ta){ ta.addEventListener('input', function(){ try{ localStorage.setItem(KEY, ta.value); }catch(e){} }); }
+  var sent = false;
+  function sendNote(){
+    if(!sent && ta && cb && cb.checked && ta.value.trim()){
+      sent = true;
+      post({event:'note', module: MODULE, text: ta.value.trim(), share: true});
+    }
+  }
+  var fin = window.finishModule;
+  window.finishModule = function(){ sendNote(); return fin(); };
+  var cta = document.querySelector('.final-cta');
+  if(cta){
+    cta.setAttribute('role','button'); cta.setAttribute('tabindex','0'); cta.style.cursor = 'pointer';
+    var go = function(){
+      sendNote();
+      var ok = post({event:'action', module: MODULE, action: ACTION});
+      if(!ok && ACTION !== 'close' && ACTION !== 'checklist'){ var s = cta.querySelector('.final-cta-sub'); if(s){ s.textContent = 'Disponible dans l’application Continuum'; } }
+      if(ACTION === 'close'){ window.finishModule(); }
+    };
+    cta.addEventListener('click', go);
+    cta.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  }
+})();
+</script>
+</body>
+</html>

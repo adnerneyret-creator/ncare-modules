@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Continuum · Votre sucre, les 90 premiers jours</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --navy:#0F172A; --navy2:#1C2333;
+  --acc:#F5A623; --acc-l:#FEF6E4; --acc-d:#B07518; --acc-rgb:245,166,35;
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#A07830;
+  --green:#1DB87E; --green-l:#E8FAF3; --green-d:#147A53;
+  --coral:#F0503A; --coral-l:#FFF0EE; --coral-d:#B8321F;
+  --amber:#F5A623; --amber-l:#FEF6E4; --amber-d:#B07518;
+  --teal:#0891B2; --teal-l:#ECFEFF; --teal-d:#0670A0;
+  --ink50:#64748B; --ink15:#CBD5E1;
+}
+html,body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--navy); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; background:var(--navy); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+.dot.active { background:var(--acc); }
+.dot.done { background:rgba(255,255,255,0.5); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+@media (prefers-reduced-motion: reduce) { .slide { transition:none; } }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--navy); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--acc); border-radius:22px; padding:0 20px; width:auto; font-size:14px; font-weight:700; color:var(--navy); }
+.nav-counter { font-size:13px; color:rgba(255,255,255,0.4); }
+.slide-cover { background:var(--navy); justify-content:center; align-items:center; text-align:center; gap:16px; }
+.logo { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:3px; }
+.cover-emoji { font-size:64px; }
+.cover-title { font-size:26px; font-weight:800; color:white; line-height:1.2; }
+.cover-sub { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
+.cover-tag { display:inline-block; background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--acc); font-weight:600; }
+.cover-stats { display:flex; gap:24px; justify-content:center; }
+.stat { text-align:center; }
+.stat-num { font-size:22px; font-weight:800; color:white; }
+.stat-lbl { font-size:10px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px; }
+.slide-dark { background:var(--navy); }
+.s-title { font-size:20px; font-weight:800; color:white; }
+.s-sub { font-size:13px; color:rgba(255,255,255,0.55); margin-top:2px; line-height:1.5; }
+.card-dark { background:var(--navy2); border-radius:14px; padding:14px 16px; }
+.card-title { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; }
+.item { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.item:last-child { margin-bottom:0; }
+.item-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.item-text { font-size:13px; color:rgba(255,255,255,0.78); line-height:1.5; }
+.item-text strong { color:white; }
+.highlight-box { border-radius:14px; padding:16px 14px; }
+.highlight-num { font-size:36px; font-weight:900; line-height:1; }
+.highlight-lbl { font-size:13px; font-weight:600; margin-top:4px; }
+.highlight-sub { font-size:12px; opacity:0.75; margin-top:4px; line-height:1.4; }
+.note-acc { background:rgba(var(--acc-rgb),0.08); border:1px solid rgba(var(--acc-rgb),0.2); }
+.slide-white { background:white; }
+.slide-white .s-title { color:var(--navy); }
+.slide-white .s-sub { color:var(--ink50); }
+.tip-card { border-radius:14px; padding:14px 16px; border-left:4px solid; }
+.tip-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tip-text { font-size:12px; line-height:1.5; color:var(--ink50); }
+.commitment-box { background:var(--navy2); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.commitment-label { font-size:11px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; }
+.commitment-input { background:rgba(255,255,255,0.07); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:12px; padding:14px; font-size:14px; color:white; font-family:inherit; resize:none; min-height:80px; outline:none; line-height:1.5; }
+.commitment-input::placeholder { color:rgba(255,255,255,0.3); }
+.commitment-input:focus { border-color:var(--acc); }
+.slide-final { background:linear-gradient(160deg, #1C2333 0%, #0F172A 100%); justify-content:center; gap:16px; }
+.final-badge { background:rgba(var(--acc-rgb),0.15); border:1px solid rgba(var(--acc-rgb),0.3); border-radius:10px; padding:6px 14px; font-size:10px; font-weight:700; color:var(--acc); letter-spacing:1px; text-transform:uppercase; align-self:flex-start; }
+.final-title { font-size:24px; font-weight:800; color:white; line-height:1.3; }
+.final-body { font-size:13px; color:rgba(255,255,255,0.72); line-height:1.6; }
+.final-items { display:flex; flex-direction:column; gap:8px; }
+.final-item { background:rgba(var(--acc-rgb),0.1); border:1px solid rgba(var(--acc-rgb),0.2); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center; }
+.final-item-icon { font-size:20px; }
+.final-item-text { font-size:13px; color:white; line-height:1.4; }
+.final-cta { background:var(--acc); border-radius:14px; padding:16px; text-align:center; }
+.final-cta-title { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.final-cta-sub { font-size:12px; color:rgba(15,23,42,0.65); }
+.alert-box { background:rgba(240,80,58,0.1); border:1px solid rgba(240,80,58,0.3); border-radius:12px; padding:12px 14px; font-size:12.5px; color:rgba(255,255,255,0.85); line-height:1.55; }
+.alert-box strong { color:#FCA5A5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+
+    <!-- 0: COVER -->
+    <div class="slide slide-cover active" data-index="0">
+      <div class="logo">CONTINUUM · SUCRE</div>
+      <div class="cover-emoji">🩸</div>
+      <div class="cover-title">Votre sucre est trop haut.<br>Et c'est réversible.</div>
+      <div class="cover-sub">Prédiabète ou diabète de type 2 débutant : le médecin vient de vous le dire. Les 90 prochains jours sont ceux où l'on gagne le plus, et le plus facilement.</div>
+      <div class="cover-tag">Module 01 · Les 90 jours après le diagnostic</div>
+      <div class="cover-stats"><div class="stat"><div class="stat-num">6</div><div class="stat-lbl">écrans</div></div><div class="stat"><div class="stat-num">4'</div><div class="stat-lbl">à lire</div></div><div class="stat"><div class="stat-num">-58 %</div><div class="stat-lbl">de diabète avec le mode de vie</div></div></div>
+    </div>
+
+    <!-- 1: LE CHIFFRE -->
+    <div class="slide slide-dark" data-index="1">
+      <div class="s-title">Le prédiabète peut reculer.</div>
+      <div class="s-sub">Pas avec un médicament : avec -7 % de poids et 150 minutes de marche par semaine, le risque de diabète baisse de 58 %. C'est l'étude de référence, et elle tient depuis 20 ans.</div>
+      <div style="display:flex; gap:10px;"><div class="highlight-box" style="background:rgba(var(--amber-rgb,245,166,35),0.12); flex:1;"><div class="highlight-num" style="color:var(--amber);">5,7-6,4</div><div class="highlight-lbl" style="color:var(--amber);">HbA1c : prédiabète</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">zone réversible</div></div><div class="highlight-box" style="background:rgba(var(--coral-rgb,240,80,58),0.12); flex:1;"><div class="highlight-num" style="color:var(--coral);">≥ 6,5</div><div class="highlight-lbl" style="color:var(--coral);">HbA1c : diabète</div><div class="highlight-sub" style="color:rgba(255,255,255,0.6);">se traite, se contrôle</div></div></div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--acc);">Ce que mesure l'HbA1c</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>La moyenne de votre sucre sur 3 mois.</strong> Pas la glycémie du matin : l'empreinte que le sucre laisse sur vos globules rouges. C'est pour ça qu'on la refait tous les 3 mois, pas toutes les semaines.</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Le sucre n'abîme pas tout de suite.</strong> Il abîme les petits vaisseaux (yeux, reins, nerfs des pieds) et les gros (cœur, cerveau) sur 10 à 20 ans. Silencieusement.</div></div><div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Ce que vous faites maintenant</strong> compte plus que ce que vous ferez dans 5 ans. La fenêtre est ouverte.</div></div>
+      </div>
+    </div>
+
+    <!-- 2: LE MECANISME -->
+    <div class="slide slide-dark" data-index="2">
+      <div class="s-title">Ce qui fait monter le sucre.<br>Et ce qui le fait descendre.</div>
+      <div class="s-sub">Trois mécanismes. Trois leviers.</div>
+      <div class="card-dark">
+        <div class="card-title" style="color:var(--teal);">Dans votre corps</div>
+        <div class="item"><div class="item-dot" style="background:var(--amber);"></div><div class="item-text"><strong>Le muscle est le premier consommateur de sucre.</strong> Après un repas, un muscle qui a marché absorbe le sucre sans avoir besoin d'insuline. Un muscle au repos, non.</div></div><div class="item"><div class="item-dot" style="background:var(--coral);"></div><div class="item-text"><strong>Le foie fabrique du sucre la nuit.</strong> Le sommeil court et le stress lui disent d'en fabriquer plus. Dormir, c'est traiter.</div></div><div class="item"><div class="item-dot" style="background:var(--teal);"></div><div class="item-text"><strong>Les sucres rapides</strong> (boissons sucrées, pain blanc, jus) font un pic que le corps ne gère plus. Les fibres, les protéines et les graisses de qualité l'aplatissent.</div></div>
+      </div>
+      <div class="alert-box"><strong>Appelez le cabinet dans la semaine :</strong> soif intense, urines très abondantes, perte de poids rapide sans effort, vue qui baisse, plaie du pied qui ne guérit pas. Sous traitement : sueurs, tremblements, malaise = sucre trop bas, prenez 3 morceaux de sucre et appelez.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;">Le médecin a calculé votre risque sur 10 ans, avec la tension, le cholestérol, le tabac et votre famille. <strong style="color:var(--acc);">On ne traite pas un chiffre, on traite ce risque.</strong> Et le tabac y pèse lourd.</div>
+      </div>
+    </div>
+
+    <!-- 3: LES LEVIERS -->
+    <div class="slide slide-white" data-index="3">
+      <div class="s-title">Quatre leviers,<br>dans cet ordre.</div>
+      <div class="s-sub">Aucun régime. Des règles qui tiennent dans le temps.</div>
+      <div class="tip-card" style="background:var(--amber-l); border-color:var(--amber);"><div class="tip-title" style="color:var(--amber-d);">🥗  L'assiette qui aplatit le pic</div><div class="tip-text">La moitié de l'assiette en légumes, un quart de protéines (œufs, poisson, volaille, légumineuses), un quart de féculents complets. Zéro boisson sucrée, y compris les jus. Les fruits entiers, oui ; en jus, non.</div></div><div class="tip-card" style="background:var(--green-l); border-color:var(--green);"><div class="tip-title" style="color:var(--green-d);">🚶  Marcher 15 minutes après chaque repas</div><div class="tip-text">C'est le geste le plus efficace et le moins connu : la marche juste après le repas fait absorber le sucre par le muscle, sans insuline. Trois fois par jour, c'est vos 150 minutes par semaine.</div></div><div class="tip-card" style="background:var(--teal-l); border-color:var(--teal);"><div class="tip-title" style="color:var(--teal-d);">💪  Deux séances de renforcement par semaine</div><div class="tip-text">Squats contre un mur, montées d'escaliers, élastiques. Dix minutes. Plus de muscle, c'est plus de place pour ranger le sucre, même au repos.</div></div><div class="tip-card" style="background:var(--coral-l); border-color:var(--coral);"><div class="tip-title" style="color:var(--coral-d);">🚭  Tabac : zéro</div><div class="tip-text">Si vous fumez, c'est le facteur qui pèse le plus lourd dans votre risque, avant le sucre et avant le cholestérol. Le cabinet peut vous aider à arrêter ; dites-le au prochain rendez-vous.</div></div>
+    </div>
+
+    <!-- 4: ENGAGEMENT -->
+    <div class="slide slide-dark" data-index="4">
+      <div class="s-title">Votre engagement<br>pour ces 90 jours.</div>
+      <div class="s-sub">Un changement, pas dix.</div>
+      <div class="card-dark note-acc">
+        <div class="item-text" style="color:rgba(255,255,255,0.8); line-height:1.7; font-size:13px;">La prochaine HbA1c dans 3 mois dira ce que ces 90 jours ont fait. Les patients qui choisissent un seul changement et le tiennent font mieux que ceux qui en essaient cinq. Choisissez le vôtre.</div>
+      </div>
+      <div class="commitment-box">
+        <div class="commitment-label">Dans les 90 prochains jours, je m'engage à…</div>
+        <textarea class="commitment-input" placeholder="ex. remplacer les boissons sucrées par de l&#x27;eau.
+ou : marcher 15 minutes après le dîner, tous les jours.
+ou : un petit-déjeuner avec des œufs au lieu du pain-confiture."></textarea><label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.8);cursor:pointer;"><input type="checkbox" id="shareNote" style="width:20px;height:20px;accent-color:var(--acc);flex-shrink:0;">Partager cette phrase avec le médecin</label>
+      </div>
+      <div class="card-dark">
+        <div class="item-text" style="color:rgba(255,255,255,0.55); font-size:12px;">Par défaut, ce que vous écrivez reste sur votre téléphone. Cochez la case si vous voulez que le médecin le lise. L'application n'est pas surveillée en continu. Urgence : 144 · Détresse : 143.</div>
+      </div>
+    </div>
+
+    <!-- 5: SUITE -->
+    <div class="slide slide-final" data-index="5">
+      <div class="final-badge">SUCRE · Jour 1</div>
+      <div class="final-title">Dans 90 jours,<br>un chiffre vous répondra.</div>
+      <div class="final-body">Chaque mois pendant 3 mois, l'application vous envoie deux questionnaires courts sur votre activité physique et votre alimentation. À 3 mois, une nouvelle HbA1c, et vous verrez ensemble avec le médecin ce qui a bougé.</div>
+      <div class="final-items"><div class="final-item"><div class="final-item-icon">📲</div><div class="final-item-text"><strong>Activité et alimentation</strong> : deux questionnaires courts chaque mois, 3 minutes.</div></div><div class="final-item"><div class="final-item-icon">🩸</div><div class="final-item-text"><strong>HbA1c à 3 mois</strong>, cholestérol et tension au même rendez-vous.</div></div><div class="final-item"><div class="final-item-icon">📦</div><div class="final-item-text"><strong>À aborder au rendez-vous</strong> : l'assiette en pratique, et vos pieds, vos yeux, vos reins.</div></div></div>
+      <div class="final-cta">
+        <div class="final-cta-title">Répondre aux deux questionnaires</div>
+        <div class="final-cta-sub">3 minutes · Votre point de départ pour les 90 jours</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&larr;</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Suivant &rarr;</button>
+  </div>
+</div>
+
+<script>
+var current = 0, total = 6;
+var slides = document.querySelectorAll('.slide');
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) { var d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' active' : ''); bar.appendChild(d); dots.push(d); }
+function updateDots() { dots.forEach(function(d, i) { d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : ''); }); }
+function getClass(idx) {
+  if (idx === 0) return 'slide slide-cover';
+  if (idx === 3) return 'slide slide-white';
+  if (idx === 5) return 'slide slide-final';
+  return 'slide slide-dark';
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = getClass(parseInt(s.dataset.index)); });
+  slides[current].className = getClass(current) + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].classList.add('active');
+  slides[current].scrollTop = 0;
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '\u2713 Terminé' : 'Suivant \u2192';
+  nb.style.background = current === total - 1 ? '#1DB87E' : 'var(--acc)';
+  nb.style.color = current === total - 1 ? 'white' : 'var(--navy)';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0;
+document.getElementById('slides').addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) { var d = sx - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); }, {passive:true});
+document.addEventListener('keydown', function(e) { if (e.key === 'ArrowRight') onNext(); if (e.key === 'ArrowLeft') navigate(-1); });
+</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
+<script>
+/* CONTINUUM-NOTE : sauvegarde locale de la phrase, partage sur choix, bouton d'action */
+(function(){
+  var MODULE = 'sucre-m01', ACTION = 'start_activity_diet';
+  function post(p){ try{ if(window.NcareBridge && window.NcareBridge.postMessage){ window.NcareBridge.postMessage(JSON.stringify(p)); return true; } }catch(e){} return false; }
+  var ta = document.querySelector('.commitment-input'), cb = document.getElementById('shareNote');
+  var KEY = 'continuum-note-' + MODULE;
+  try{ var v = localStorage.getItem(KEY); if(ta && v){ ta.value = v; } }catch(e){}
+  if(ta){ ta.addEventListener('input', function(){ try{ localStorage.setItem(KEY, ta.value); }catch(e){} }); }
+  var sent = false;
+  function sendNote(){
+    if(!sent && ta && cb && cb.checked && ta.value.trim()){
+      sent = true;
+      post({event:'note', module: MODULE, text: ta.value.trim(), share: true});
+    }
+  }
+  var fin = window.finishModule;
+  window.finishModule = function(){ sendNote(); return fin(); };
+  var cta = document.querySelector('.final-cta');
+  if(cta){
+    cta.setAttribute('role','button'); cta.setAttribute('tabindex','0'); cta.style.cursor = 'pointer';
+    var go = function(){
+      sendNote();
+      var ok = post({event:'action', module: MODULE, action: ACTION});
+      if(!ok && ACTION !== 'close' && ACTION !== 'checklist'){ var s = cta.querySelector('.final-cta-sub'); if(s){ s.textContent = 'Disponible dans l’application Continuum'; } }
+      if(ACTION === 'close'){ window.finishModule(); }
+    };
+    cta.addEventListener('click', go);
+    cta.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  }
+})();
+</script>
+</body>
+</html>
