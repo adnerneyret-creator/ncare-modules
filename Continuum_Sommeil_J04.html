@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0F2130">
+<title>Continuum · Sommeil · Jour 4 · Tout commence le matin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --night:#0F2130; --night2:#17303F; --night3:#1F3D50; --line:rgba(255,255,255,0.09);
+  --blue:#1F4E6B; --teal:#2B7A76; --teal-l:#9EC9C5; --mist:#E1EFEE; --paper:#F4F7F8;
+  --terra:#E39A7B; --terra-d:#A84A28; --moon:#F2E6C9;
+  --t1:#FFFFFF; --t2:rgba(255,255,255,0.78); --t3:rgba(255,255,255,0.55);
+  --serif:'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans:'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+html,body { height:100%; overflow:hidden; font-family:var(--sans); background:var(--night); color:var(--t1); }
+.app { height:100vh; height:100dvh; display:flex; flex-direction:column; }
+.progress-bar { display:flex; gap:4px; padding:12px 16px 8px; padding-top:calc(12px + env(safe-area-inset-top)); background:var(--night); }
+.dot { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,0.16); transition:background 0.3s; }
+.dot.active { background:var(--teal-l); }
+.dot.done { background:rgba(158,201,197,0.45); }
+.slides { flex:1; overflow:hidden; position:relative; }
+.slide { position:absolute; top:0; left:0; right:0; bottom:0; opacity:0; transform:translateX(100%); transition:all 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:18px 20px 24px; display:flex; flex-direction:column; gap:14px; background:var(--night); }
+.slide.active { opacity:1; transform:translateX(0); }
+.slide.prev { opacity:0; transform:translateX(-100%); }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px 20px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); background:var(--night); border-top:1px solid var(--line); }
+.nav-btn { background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:white; font-family:var(--sans); }
+.nav-btn:disabled { opacity:0.2; }
+.nav-btn.primary { background:var(--teal-l); border-radius:22px; padding:0 20px; width:auto; font-size:15px; font-weight:700; color:var(--night); }
+.nav-btn.primary.finish { background:var(--moon); }
+.nav-counter { font-size:13px; color:var(--t3); }
+
+/* Couverture */
+.s-cover { justify-content:center; align-items:center; text-align:center; gap:16px;
+  background: radial-gradient(1.5px 1.5px at 18% 22%, rgba(255,255,255,0.7), transparent 60%),
+              radial-gradient(1px 1px at 72% 14%, rgba(255,255,255,0.6), transparent 60%),
+              radial-gradient(1.5px 1.5px at 84% 38%, rgba(255,255,255,0.5), transparent 60%),
+              radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.45), transparent 60%),
+              radial-gradient(1px 1px at 60% 82%, rgba(255,255,255,0.4), transparent 60%),
+              radial-gradient(120% 80% at 50% 0%, #1B3A50 0%, var(--night) 70%); }
+.logo { font-size:11px; font-weight:700; color:var(--teal-l); letter-spacing:3px; }
+.moon { width:72px; height:72px; }
+.day { font-family:var(--serif); font-size:15px; color:var(--moon); letter-spacing:0.5px; }
+.cover-title { font-family:var(--serif); font-size:34px; font-weight:400; line-height:1.12; letter-spacing:-0.01em; }
+.cover-sub { font-size:15px; color:var(--t2); line-height:1.55; max-width:320px; }
+.cover-tag { display:inline-block; background:rgba(158,201,197,0.12); border:1px solid rgba(158,201,197,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:var(--teal-l); font-weight:600; }
+.cover-stats { display:flex; gap:26px; justify-content:center; margin-top:4px; }
+.stat-num { font-size:20px; font-weight:800; }
+.stat-lbl { font-size:10px; color:var(--t3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+/* Contenu */
+.eyebrow { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--teal-l); }
+.t { font-family:var(--serif); font-size:27px; font-weight:400; line-height:1.15; letter-spacing:-0.01em; }
+.sub { font-size:14px; color:var(--t2); line-height:1.55; }
+.card { background:var(--night2); border:1px solid var(--line); border-radius:16px; padding:15px 16px; display:flex; flex-direction:column; gap:10px; }
+.card h3 { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--teal-l); }
+.card p, .p { font-size:14px; color:var(--t2); line-height:1.55; }
+.card strong, .p strong, .li strong { color:var(--t1); font-weight:700; }
+.li { display:flex; gap:11px; align-items:flex-start; font-size:14px; color:var(--t2); line-height:1.5; }
+.li .d { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:7px; background:var(--teal-l); }
+.li .n { flex-shrink:0; width:24px; height:24px; border-radius:12px; background:var(--night3); color:var(--teal-l); font-size:12px; font-weight:800; display:grid; place-items:center; margin-top:-1px; }
+.big { font-family:var(--serif); font-size:44px; line-height:1; color:var(--moon); }
+.duo { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.mini { background:var(--night2); border:1px solid var(--line); border-radius:14px; padding:13px; display:flex; flex-direction:column; gap:6px; }
+.mini b { font-size:14px; }
+.mini span { font-size:12.5px; color:var(--t2); line-height:1.45; }
+.tonight { background:linear-gradient(160deg, rgba(158,201,197,0.16), rgba(158,201,197,0.06)); border:1px solid rgba(158,201,197,0.35); border-radius:16px; padding:15px 16px; display:flex; flex-direction:column; gap:8px; }
+.tonight .eyebrow { color:var(--moon); }
+.tonight p { font-size:15px; line-height:1.5; color:var(--t1); }
+.warn { background:rgba(227,154,123,0.10); border:1px solid rgba(227,154,123,0.4); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+.warn h3 { color:var(--terra); font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.warn p, .warn .li { font-size:13.5px; color:var(--t2); line-height:1.5; }
+.warn .li .d { background:var(--terra); }
+.note { font-size:12px; color:var(--t3); line-height:1.5; }
+.qa { background:var(--night2); border:1px solid var(--line); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.qa .q { font-family:var(--serif); font-size:18px; line-height:1.3; color:var(--t1); }
+.qa .a { font-size:14px; color:var(--t2); line-height:1.55; }
+.sources { font-size:11.5px; color:var(--t3); line-height:1.5; border-top:1px solid var(--line); padding-top:10px; }
+.tomorrow { display:flex; gap:12px; align-items:center; background:var(--night2); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+.tomorrow .ic { flex-shrink:0; width:40px; height:40px; border-radius:20px; background:var(--night3); display:grid; place-items:center; color:var(--moon); }
+.tomorrow b { display:block; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--teal-l); margin-bottom:2px; }
+.tomorrow span { font-size:14px; color:var(--t1); line-height:1.4; }
+.s-final { background:linear-gradient(170deg, #17303F 0%, var(--night) 70%); }
+
+/* Interactions */
+.field { display:flex; flex-direction:column; gap:8px; }
+.field label, .lbl { font-size:14px; font-weight:600; color:var(--t1); line-height:1.4; }
+.row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.val { font-family:var(--serif); font-size:22px; color:var(--moon); min-width:52px; text-align:right; }
+input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:44px; background:transparent; }
+input[type=range]::-webkit-slider-runnable-track { height:6px; border-radius:3px; background:var(--night3); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:var(--teal-l); margin-top:-10px; border:3px solid var(--night); }
+input[type=range]::-moz-range-track { height:6px; border-radius:3px; background:var(--night3); }
+input[type=range]::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:var(--teal-l); border:3px solid var(--night); }
+.scale { display:flex; justify-content:space-between; font-size:11px; color:var(--t3); margin-top:-8px; }
+.seg { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { min-height:44px; padding:0 14px; border-radius:22px; border:1px solid rgba(255,255,255,0.18); background:transparent; color:var(--t1); font-family:var(--sans); font-size:14px; font-weight:600; cursor:pointer; }
+.chip[aria-pressed=true] { background:var(--teal-l); border-color:var(--teal-l); color:var(--night); }
+.chip.sm { min-width:44px; padding:0 10px; }
+.seg.grid4 { display:grid; grid-template-columns:repeat(4,1fr); }
+.yn { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px 0; border-top:1px solid var(--line); }
+.yn:first-of-type { border-top:0; }
+.yn span { font-size:13.5px; color:var(--t2); line-height:1.4; flex:1; }
+.yn .seg { flex-shrink:0; flex-wrap:nowrap; gap:6px; }
+.yn .chip { min-width:56px; padding:0 10px; font-size:13px; }
+.yn .chip.yes[aria-pressed=true] { background:var(--terra); border-color:var(--terra); color:var(--night); }
+input[type=time] { min-height:48px; border-radius:12px; border:1px solid rgba(158,201,197,0.4); background:var(--night3); color:var(--t1); font-family:var(--sans); font-size:20px; font-weight:700; padding:0 14px; color-scheme:dark; width:100%; }
+textarea { width:100%; min-height:88px; border-radius:12px; border:1px solid rgba(158,201,197,0.3); background:rgba(255,255,255,0.05); color:var(--t1); font-family:var(--sans); font-size:14px; line-height:1.5; padding:12px; resize:none; outline:none; }
+textarea:focus, input[type=time]:focus { border-color:var(--teal-l); }
+textarea::placeholder { color:rgba(255,255,255,0.3); }
+.btn { min-height:50px; border-radius:14px; border:0; background:var(--teal-l); color:var(--night); font-family:var(--sans); font-size:15px; font-weight:700; cursor:pointer; padding:0 18px; }
+.btn.ghost { background:transparent; color:var(--teal-l); border:1px solid rgba(158,201,197,0.5); }
+.btn.terra { background:var(--terra); }
+.result { border-radius:16px; padding:14px 16px; display:block; font-size:14px; line-height:1.5; }
+.result > * + * { margin-top:8px; }
+.result .btn { display:block; width:100%; margin-top:12px; }
+.result.ok { background:rgba(158,201,197,0.12); border:1px solid rgba(158,201,197,0.35); color:var(--t1); }
+.result.alert { background:rgba(227,154,123,0.12); border:1px solid rgba(227,154,123,0.45); color:var(--t1); }
+.result .li { font-size:13.5px; }
+.hidden { display:none !important; }
+.flip { text-align:left; width:100%; background:var(--night2); border:1px solid var(--line); border-radius:16px; padding:14px 16px; color:var(--t1); font-family:var(--sans); cursor:pointer; display:flex; flex-direction:column; gap:8px; }
+.flip .q { font-family:var(--serif); font-size:17px; line-height:1.3; }
+.flip .hint { font-size:12px; color:var(--teal-l); font-weight:600; }
+.flip .a { display:none; font-size:13.5px; color:var(--t2); line-height:1.5; }
+.flip[aria-expanded=true] .a { display:block; }
+.flip[aria-expanded=true] .hint { display:none; }
+.verdict { display:inline-block; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; border-radius:8px; padding:2px 8px; margin-right:6px; }
+.verdict.f { background:rgba(227,154,123,0.18); color:var(--terra); }
+.verdict.v { background:rgba(158,201,197,0.18); color:var(--teal-l); }
+.verdict.m { background:rgba(242,230,201,0.16); color:var(--moon); }
+.check.compact { min-height:46px; padding:8px 12px; font-size:13.5px; }
+.check { display:flex; gap:12px; align-items:center; width:100%; text-align:left; min-height:52px; background:var(--night2); border:1px solid var(--line); border-radius:14px; padding:10px 14px; color:var(--t1); font-family:var(--sans); font-size:14px; line-height:1.4; cursor:pointer; }
+.check .box { flex-shrink:0; width:24px; height:24px; border-radius:7px; border:2px solid rgba(158,201,197,0.6); display:grid; place-items:center; color:var(--night); font-size:15px; font-weight:900; }
+.check[aria-pressed=true] { border-color:rgba(158,201,197,0.5); background:rgba(158,201,197,0.10); }
+.check .box { color:transparent; }
+.check[aria-pressed=true] .box { background:var(--teal-l); border-color:var(--teal-l); color:var(--night); }
+.out { font-family:var(--serif); font-size:30px; color:var(--moon); line-height:1.1; }
+.bar { height:10px; border-radius:5px; background:var(--night3); overflow:hidden; }
+.bar i { display:block; height:100%; border-radius:5px; background:var(--teal-l); transition:width 0.4s; }
+.toast { position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--paper); color:var(--night); font-size:13px; font-weight:600; padding:10px 16px; border-radius:12px; z-index:9998; opacity:0; transition:opacity 0.25s; pointer-events:none; max-width:86%; text-align:center; }
+.toast.on { opacity:1; }
+</style>
+</head>
+<body data-module="S04">
+<div class="app">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slides" id="slides">
+    <div class="slide s-cover active" data-cls="slide s-cover" data-index="0">
+
+      <div class="logo">CONTINUUM · SOMMEIL</div>
+      <svg class="moon" viewBox="0 0 72 72" aria-hidden="true"><defs><radialGradient id="mg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FBF4E3"/><stop offset="1" stop-color="#E9D9B0"/></radialGradient></defs><path d="M46 8a28 28 0 1 0 18 46A24 24 0 0 1 46 8z" fill="url(#mg)"/></svg>
+      <div class="day">Jour 4 sur 14</div>
+      <div class="cover-title">Tout commence<br>le matin.</div>
+      <div class="cover-sub">Le geste le plus simple et l’un des plus puissants : se lever à la même heure, tous les jours.</div>
+      <div class="cover-tag">Programme découverte · 14 jours</div>
+      <div class="cover-stats">
+        <div><div class="stat-num">6</div><div class="stat-lbl">écrans</div></div>
+        <div><div class="stat-num">3'</div><div class="stat-lbl">de lecture</div></div>
+        <div><div class="stat-num">1</div><div class="stat-lbl">geste ce soir</div></div>
+      </div>
+    </div>
+    <div class="slide s-dark" data-cls="slide s-dark" data-index="1">
+<div><div class="eyebrow">Comprendre</div><div class="t" style="margin-top:6px">Pourquoi l’heure du lever ?</div></div><div class="card"><div class="li"><span class="n">1</span><div><strong>Elle règle votre horloge interne.</strong> Le corps se cale sur le moment où il voit la lumière et se met en mouvement.</div></div><div class="li"><span class="n">2</span><div><strong>Elle lance la pression de sommeil.</strong> Se lever à heure fixe, c’est faire monter l’envie de dormir à heure fixe le soir.</div></div><div class="li"><span class="n">3</span><div><strong>C’est la seule chose que vous contrôlez vraiment.</strong> On ne peut pas commander l’endormissement. Le lever, si.</div></div></div><div class="tonight" style="gap:6px"><div class="eyebrow">Le secret</div><p>Le soir, on attend le sommeil. <strong>Le matin, on le prépare</strong> pour la nuit suivante.</p></div>
+    </div>
+    <div class="slide s-dark" data-cls="slide s-dark" data-index="2">
+<div><div class="eyebrow">Comprendre</div><div class="t" style="margin-top:6px">Le décalage horaire du week-end.</div></div><div class="card"><p>Se lever deux heures plus tard le samedi et le dimanche, c’est imposer à son corps un petit décalage horaire chaque semaine. Les chercheurs appellent cela le <strong>« jet lag social »</strong>.</p><p>Résultat : le dimanche soir, le sommeil ne vient pas, et le lundi matin est difficile.</p></div><div class="card"><h3>En pratique</h3><div class="li"><span class="d"></span><div><strong>Même heure de lever sept jours sur sept</strong>, même après une mauvaise nuit : c’est là que c’est le plus utile.</div></div><div class="li"><span class="d"></span><div><strong>Dans l’heure qui suit</strong>, 15 à 30 minutes de lumière du jour, dehors si possible. Même par temps gris, la lumière extérieure est bien plus forte qu’à l’intérieur.</div></div></div>
+    </div>
+    <div class="slide s-dark" data-cls="slide s-dark" data-index="3">
+<div><div class="eyebrow">À vous</div><div class="t" style="margin-top:6px">Choisissez votre heure de lever.</div></div><div class="sub">Une heure que vous pourrez tenir tous les jours, week-end compris.</div><div class="card no-swipe"><div class="field"><label for="lever">Mon heure de lever</label><input type="time" id="lever" value="07:00" step="900"></div><p id="leverMsg"></p></div><div class="warn"><h3>Bon à savoir</h3><p>Le réveil sonne, vous vous levez, même si la nuit a été mauvaise. Les premiers jours peuvent être un peu plus fatigants : c’est le signe que la pression de sommeil se reconstruit.</p></div>
+    </div>
+    <div class="slide s-dark" data-cls="slide s-dark" data-index="4">
+<div><div class="eyebrow">Vous nous demandez souvent</div><div class="t" style="margin-top:6px">Vos questions.</div></div><div class="qa"><div class="q">« Après une nuit blanche, je ne devrais pas dormir plus le matin ? »</div><div class="a">C’est tentant, mais se lever à l’heure prévue garde intacte la pression de sommeil pour la nuit suivante, qui sera souvent meilleure. Une grasse matinée, au contraire, décale tout.</div></div><div class="qa"><div class="q">« Et si je suis vraiment épuisé·e dans la journée ? »</div><div class="a">Une sieste courte, 20 minutes au plus et avant 15 h, peut dépanner. Évitez de conduire si vous vous sentez somnolent·e.</div></div>
+    </div>
+    <div class="slide s-final" data-cls="slide s-final" data-index="5">
+<div><div class="eyebrow">Jour 4</div><div class="t" style="margin-top:6px">Votre geste du soir.</div></div><div class="tonight"><div class="eyebrow">Ce soir, une seule chose</div><p>Réglez votre réveil sur <strong><span class="leverOut">7 h</span></strong> pour les sept prochains jours, week-end compris. Demain, dans l’heure qui suit le lever : un peu de lumière du jour.</p></div><div class="tomorrow"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></div><div><b>Demain</b><span>Le lit, c’est pour dormir : la technique de base des spécialistes du sommeil.</span></div></div><div class="sources"><strong style="color:var(--t2)">Sources</strong> · Riemann et al., J Sleep Res 2023 (recommandations européennes) ; Wittmann et al., Chronobiol Int 2006 (jet lag social) ; Edinger et al., J Clin Sleep Med 2021 (AASM).</div>
+    </div>
+
+  </div>
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled aria-label="Précédent">←</button>
+    <span class="nav-counter" id="counter">1 / 6</span>
+    <button class="nav-btn primary" id="nextBtn" onclick="onNext()">Suivant →</button>
+  </div>
+</div>
+<div class="toast" id="cxToast" role="status" aria-live="polite"></div>
+
+<script>
+var current = 0;
+var slides = document.querySelectorAll('.slide');
+var total = slides.length;
+var dots = [];
+var bar = document.getElementById('progressBar');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  bar.appendChild(d);
+  dots.push(d);
+}
+document.getElementById('counter').textContent = '1 / ' + total;
+function updateDots() {
+  dots.forEach(function(d, i) {
+    d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  });
+}
+function navigate(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides.forEach(function(s) { if (!s.classList.contains('active')) s.className = s.getAttribute('data-cls'); });
+  slides[current].className = slides[current].getAttribute('data-cls') + (dir > 0 ? ' prev' : '');
+  current = next;
+  slides[current].className = slides[current].getAttribute('data-cls') + ' active';
+  slides[current].scrollTop = 0;
+  document.getElementById('prevBtn').disabled = current === 0;
+  var nb = document.getElementById('nextBtn');
+  nb.textContent = current === total - 1 ? '✓ Terminé' : 'Suivant →';
+  if (current === total - 1) nb.classList.add('finish'); else nb.classList.remove('finish');
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  updateDots();
+}
+var sx = 0, sy = 0, swipeOk = true;
+document.getElementById('slides').addEventListener('touchstart', function(e) {
+  swipeOk = !(e.target.closest && e.target.closest('input,textarea,select,.no-swipe'));
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+document.getElementById('slides').addEventListener('touchend', function(e) {
+  if (!swipeOk) return;
+  var dx = sx - e.changedTouches[0].clientX; var dy = sy - e.changedTouches[0].clientY;
+  if (Math.abs(dx) > 50 && Math.abs(dy) < 80) navigate(dx > 0 ? 1 : -1);
+}, {passive:true});
+
+/* ---- Outils Continuum : mémoire locale, envoi à l'application, heures ---- */
+var CX = {
+  mod: document.body.getAttribute('data-module'),
+  post: function(p) {
+    try { if (window.NcareBridge && window.NcareBridge.postMessage) { window.NcareBridge.postMessage(JSON.stringify(p)); return true; } } catch (e) {}
+    return false;
+  },
+  get: function(k) { try { var v = localStorage.getItem('cx_sommeil_' + k); return v === null ? null : JSON.parse(v); } catch (e) { return null; } },
+  set: function(k, v, share) {
+    try { localStorage.setItem('cx_sommeil_' + k, JSON.stringify(v)); } catch (e) {}
+    if (share !== false) CX.post({event:'answer', module:CX.mod, key:k, value:v});
+  },
+  param: function(k) { try { return new URLSearchParams(location.search).get(k); } catch (e) { return null; } },
+  cta: function(action) {
+    if (!CX.post({event:'cta', module:CX.mod, action:action})) CX.toast('Disponible dans l’application Continuum');
+  },
+  toast: function(msg) {
+    var t = document.getElementById('cxToast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(CX._tt); CX._tt = setTimeout(function(){ t.classList.remove('on'); }, 2200);
+  },
+  toMin: function(hhmm) { if (!hhmm || hhmm.indexOf(':') < 0) return null; var p = hhmm.split(':'); return (+p[0]) * 60 + (+p[1]); },
+  fmt: function(min) { min = ((Math.round(min) % 1440) + 1440) % 1440; if (min === 0) return 'minuit'; var h = Math.floor(min / 60), m = min % 60; return h + ' h' + (m ? ' ' + (m < 10 ? '0' : '') + m : ''); },
+  hhmm: function(min) { min = ((Math.round(min) % 1440) + 1440) % 1440; var h = Math.floor(min / 60), m = min % 60; return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m; },
+  hours: function(x) { var h = Math.floor(x), m = Math.round((x - h) * 60); if (m === 60) { h++; m = 0; } return h + ' h' + (m ? ' ' + (m < 10 ? '0' : '') + m : ''); },
+  /* Boutons à choix : data-group, data-val ; multiple si data-multi */
+  bindSeg: function(container, onChange) {
+    var multi = container.hasAttribute('data-multi');
+    var btns = container.querySelectorAll('[data-val]');
+    btns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        if (multi) { b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }
+        else { btns.forEach(function(o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); }); }
+        onChange(CX.segVal(container));
+      });
+    });
+  },
+  segVal: function(container) {
+    var multi = container.hasAttribute('data-multi');
+    var on = [].filter.call(container.querySelectorAll('[data-val]'), function(b) { return b.getAttribute('aria-pressed') === 'true'; })
+              .map(function(b) { return b.getAttribute('data-val'); });
+    return multi ? on : (on[0] === undefined ? null : on[0]);
+  },
+  setSeg: function(container, val) {
+    var multi = container.hasAttribute('data-multi');
+    container.querySelectorAll('[data-val]').forEach(function(b) {
+      var v = b.getAttribute('data-val');
+      var on = multi ? (val || []).indexOf(v) >= 0 : String(val) === v;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  },
+  /* Cartes à retourner */
+  bindFlips: function() {
+    document.querySelectorAll('.flip').forEach(function(f) {
+      f.addEventListener('click', function() { f.setAttribute('aria-expanded', f.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'); });
+    });
+  },
+  /* Cases à cocher */
+  bindChecks: function(selector, onChange) {
+    document.querySelectorAll(selector).forEach(function(c) {
+      c.addEventListener('click', function() {
+        c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+        if (onChange) onChange();
+      });
+    });
+  },
+  /* Signaux d'alerte partagés J1 / J7 / J13 */
+  FLAGS: {
+    ronfle: 'Ronflement fort, pauses respiratoires ou étouffements la nuit',
+    somnolence: 'Somnolence dans la journée, au volant ou en réunion',
+    jambes: 'Sensations désagréables dans les jambes le soir, qui obligent à bouger',
+    moral: 'Moral bas ou perte d’intérêt depuis plus de deux semaines',
+    somnifere: 'Prise d’un somnifère ou d’un anxiolytique pour dormir',
+    nuit: 'Travail de nuit ou horaires décalés'
+  },
+  FLAG_ADVICE: {
+    ronfle: 'Ce peut être une apnée du sommeil : fréquente, souvent méconnue, et qui se soigne. Elle mérite un avis médical.',
+    somnolence: 'Une somnolence importante doit être vérifiée par un médecin. En attendant, ne conduisez pas si vous vous sentez somnolent·e.',
+    jambes: 'Ce peut être un syndrome des jambes sans repos, qui se soigne. Un bilan simple (par exemple le fer) peut aider.',
+    moral: 'Le sommeil et le moral sont liés. Parlez-en à un médecin : vous n’avez pas à porter cela seul·e.',
+    somnifere: 'Ne modifiez pas votre traitement seul·e. Le programme reste utile ; votre médecin peut vous aider à réduire progressivement.',
+    nuit: 'Ce programme est pensé pour des horaires de jour. Un médecin peut l’adapter à vos horaires.'
+  }
+};
+</script>
+<script>
+(function(){
+
+var inp = document.getElementById('lever');
+var start = CX.param('lever') || CX.get('lever') || '07:00';
+inp.value = start;
+function show(save) {
+  var m = CX.toMin(inp.value); if (m === null) return;
+  document.querySelectorAll('.leverOut').forEach(function(e){ e.textContent = CX.fmt(m); });
+  document.getElementById('leverMsg').innerHTML = 'Lever à <strong>' + CX.fmt(m) + '</strong>, tous les jours. Lumière du jour avant <strong>' + CX.fmt(m + 60) + '</strong>.';
+  if (save) CX.set('lever', inp.value);
+}
+inp.addEventListener('change', function(){ show(true); });
+inp.addEventListener('input', function(){ show(false); });
+show(false);
+
+})();
+</script>
+
+<style>
+.swipe-hint{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:0.05em;padding:8px 20px;border-radius:100px;pointer-events:none;white-space:nowrap;animation:hintFade 3.5s ease forwards;z-index:9999;display:flex;align-items:center;gap:8px;}
+.sh-arrow{animation:shSlide 1s ease-in-out infinite;display:inline-block;}
+@keyframes shSlide{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+</style>
+<div class="swipe-hint" id="swipeHint"><span class="sh-arrow">←</span> glissez pour naviguer <span class="sh-arrow">→</span></div>
+<script>setTimeout(function(){var h=document.getElementById('swipeHint');if(h)h.style.display='none';},3600);</script>
+<!-- NCARE-BRIDGE:START -->
+<div id="ncare-end" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(10,10,10,0.96);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;">
+  <div style="font-size:44px;margin-bottom:16px;">&#10003;</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Module termin&eacute;</div>
+  <div style="font-size:14px;opacity:0.7;max-width:280px;line-height:1.5;">Vous pouvez fermer cette page et revenir &agrave; l'application.</div>
+</div>
+<script>
+(function(){
+  // Envoie un message a l'app Pills (NCare). Retourne false hors de l'app.
+  function post(payload){
+    try{
+      if(window.NcareBridge && window.NcareBridge.postMessage){
+        window.NcareBridge.postMessage(JSON.stringify(payload));
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+
+  // Remonte la progression a chaque changement de slide, sans modifier
+  // la fonction navigate() d'origine.
+  var inner = window.navigate;
+  window.navigate = function(dir){
+    inner(dir);
+    post({event:'progress', slide: window.current + 1, total: window.total});
+  };
+
+  // Derniere slide : « Termine ». Ferme la page et revient dans l'app.
+  window.finishModule = function(){
+    if(post({event:'completed', slide: window.total, total: window.total})) return;
+    // Hors de l'app : le navigateur ignore souvent window.close(),
+    // on affiche alors un ecran de fin.
+    window.close();
+    setTimeout(function(){
+      if(document.hidden) return;
+      var el = document.getElementById('ncare-end');
+      if(el) el.style.display = 'flex';
+    }, 300);
+  };
+
+  window.onNext = function(){
+    if(window.current === window.total - 1) return window.finishModule();
+    window.navigate(1);
+  };
+
+  post({event:'ready', slide: window.current + 1, total: window.total});
+})();
+</script>
+<!-- NCARE-BRIDGE:END -->
+
+</body>
+</html>
